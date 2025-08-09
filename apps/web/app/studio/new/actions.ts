@@ -44,7 +44,7 @@ const GenerateBriefSchema = z.object({
   summary: z.string().min(1, 'Summary is required'),
 });
 
-import { addIdea, addBrief, addEvents, getNextIdeaId, getNextBriefId, getNextEventId } from '../../../lib/data';
+import { addIdea, addBrief, addEvents, getNextIdeaId, getNextBriefId, getNextEventId, updateIdeaStatus } from '../../../lib/data';
 
 export async function generateBriefAndPlan(formData: FormData) {
   try {
@@ -63,17 +63,6 @@ export async function generateBriefAndPlan(formData: FormData) {
     const { summary } = validatedFields.data;
     const idempotencyKey = `idea-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    // Check if idea already exists with this summary
-    const { getIdeaData } = await import('../../../lib/data');
-    const existingData = getIdeaData(1); // Check if any ideas exist
-    const existingIdea = existingData.idea && existingData.idea.summary === summary ? existingData.idea : null;
-    if (existingIdea) {
-      return {
-        error: 'An idea with this summary already exists',
-        ideaId: existingIdea.id,
-      };
-    }
-
     // Create idea
     const idea = {
       id: getNextIdeaId(),
@@ -82,7 +71,7 @@ export async function generateBriefAndPlan(formData: FormData) {
       summary,
       createdAt: new Date(),
     };
-    addIdea(idea);
+    await addIdea(idea);
 
     // Generate brief and plan via orchestrator
     const orchestrationResult = await mockOrchestrateIdea(summary);
@@ -95,7 +84,7 @@ export async function generateBriefAndPlan(formData: FormData) {
       aiMeta: { idempotencyKey },
       createdAt: new Date(),
     };
-    addBrief(brief);
+    await addBrief(brief);
 
     // Create events
     const newEvents = [
@@ -116,9 +105,11 @@ export async function generateBriefAndPlan(formData: FormData) {
         createdAt: new Date(),
       }
     ];
-    addEvents(newEvents);
+    await addEvents(newEvents);
 
     revalidatePath('/ideas/[id]', 'page');
+    revalidatePath('/ideas', 'page');
+    revalidatePath('/projects', 'page');
 
     return {
       success: true,
@@ -143,26 +134,8 @@ export async function generateBriefAndPlan(formData: FormData) {
 
 export async function approveBrief(ideaId: number) {
   try {
-    // Find the idea
-    const { getIdeaData } = await import('../../../lib/data');
-    const { idea } = getIdeaData(ideaId);
-    if (!idea) {
-      return {
-        error: 'Idea not found',
-      };
-    }
-
-    // Check if already approved
-    if (idea.status === 'active') {
-      return {
-        success: true,
-        message: 'Brief already approved',
-        ideaId,
-      };
-    }
-
-    // Update idea status
-    idea.status = 'active';
+    // Update idea status to active
+    await updateIdeaStatus(ideaId, 'active');
 
     // Create events
     const newEvents = [
@@ -171,7 +144,7 @@ export async function approveBrief(ideaId: number) {
         entityType: 'idea',
         entityId: ideaId,
         kind: 'brief.approved',
-        data: { briefId: getIdeaData(ideaId).brief?.id },
+        data: { ideaId },
         createdAt: new Date(),
       },
       {
@@ -199,9 +172,11 @@ export async function approveBrief(ideaId: number) {
         createdAt: new Date(),
       }
     ];
-    addEvents(newEvents);
+    await addEvents(newEvents);
 
     revalidatePath('/ideas/[id]', 'page');
+    revalidatePath('/ideas', 'page');
+    revalidatePath('/projects', 'page');
 
     return {
       success: true,

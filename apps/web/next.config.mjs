@@ -1,2 +1,2 @@
-const nextConfig = { experimental: { typedRoutes: true, serverActions: true } };
+const nextConfig = { experimental: { typedRoutes: true } };
 export default nextConfig;
