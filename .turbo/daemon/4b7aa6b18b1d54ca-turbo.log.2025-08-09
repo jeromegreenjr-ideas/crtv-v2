@@ -195,3 +195,5 @@
 2025-08-09T23:19:13.109990Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/postcss.config.js"), AnchoredSystemPathBuf("package.json"), AnchoredSystemPathBuf("apps/web/next.config.mjs")}
 2025-08-09T23:19:13.110008Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
 2025-08-09T23:19:13.111857Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
+2025-08-09T23:20:12.711015Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/lib/db.ts")}
+2025-08-09T23:20:12.711032Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
