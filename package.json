@@ -1,0 +1,21 @@
+{
+  "name": "crtv-studio-monorepo",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "cd apps/web && npm run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "@neondatabase/serverless": "^0.9.0",
+    "drizzle-orm": "^0.29.0",
+    "turbo": "2.0.1",
+    "vercel": "^44.7.3"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

@@ -1,0 +1,99 @@
+2025-08-09T22:32:20.251827Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
+2025-08-09T22:32:20.354303Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cache"), AnchoredSystemPathBuf(".turbo/cookies/.turbo-cookie"), AnchoredSystemPathBuf(".turbo/cookies/1.cookie")}
+2025-08-09T22:32:20.354318Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:35:25.247998Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/db/package.json"), AnchoredSystemPathBuf("packages/db/src/client.ts")}
+2025-08-09T22:35:25.248017Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:35:25.348336Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("env.example"), AnchoredSystemPathBuf("packages/db/drizzle.config.ts")}
+2025-08-09T22:35:25.348688Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:35:25.448314Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("README.md"), AnchoredSystemPathBuf("package.json")}
+2025-08-09T22:35:25.448330Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-09T22:35:25.449791Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
+2025-08-09T22:35:25.547763Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/studio/new/page.tsx"), AnchoredSystemPathBuf("apps/web/app/studio/new/actions.ts")}
+2025-08-09T22:35:25.547781Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:35:25.648722Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/ideas/[id]/ActivityList.tsx"), AnchoredSystemPathBuf("apps/web/app/ideas/[id]/page.tsx")}
+2025-08-09T22:35:25.648740Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:35:25.748006Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/ai/__tests__/schemas.test.ts"), AnchoredSystemPathBuf("packages/ai/package.json"), AnchoredSystemPathBuf("apps/web/__tests__/studio.e2e.test.ts")}
+2025-08-09T22:35:25.748026Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:35:25.847786Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/package.json")}
+2025-08-09T22:35:25.847820Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:36:41.444831Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/2.cookie")}
+2025-08-09T22:36:41.444856Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:36:44.345686Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("turbo.json")}
+2025-08-09T22:36:44.345721Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-09T22:36:44.347281Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
+2025-08-09T22:36:50.248484Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/3.cookie")}
+2025-08-09T22:36:50.248503Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:36:56.245313Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("vercel.json")}
+2025-08-09T22:36:56.245341Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:36:56.744914Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("vercel.json")}
+2025-08-09T22:36:56.744942Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:37:02.345329Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("netlify.toml")}
+2025-08-09T22:37:02.345346Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:37:02.845075Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("netlify.toml")}
+2025-08-09T22:37:02.845095Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:37:09.845636Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("DEPLOYMENT.md")}
+2025-08-09T22:37:09.845661Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:37:10.244400Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("DEPLOYMENT.md")}
+2025-08-09T22:37:10.244428Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:37:17.544592Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("DEPLOYMENT.md"), AnchoredSystemPathBuf("netlify.toml"), AnchoredSystemPathBuf("vercel.json"), AnchoredSystemPathBuf("turbo.json")}
+2025-08-09T22:37:17.544629Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-09T22:37:17.546787Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
+2025-08-09T22:38:08.487156Z  WARN turborepo_filewatch::package_watcher: lagged behind 56 processing file watching events
+2025-08-09T22:38:08.507085Z  WARN turborepo_lib::package_changes_watcher: file event lagged
+2025-08-09T22:38:08.542964Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
+2025-08-09T22:38:10.643455Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package.json")}
+2025-08-09T22:38:10.643470Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-09T22:38:10.644397Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
+2025-08-09T22:38:10.743147Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package-lock.json")}
+2025-08-09T22:38:10.743167Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:39:17.543036Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".github/workflows/deploy.yml"), AnchoredSystemPathBuf(".github"), AnchoredSystemPathBuf(".github/workflows")}
+2025-08-09T22:39:17.543056Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:39:18.139780Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".github/workflows/deploy.yml")}
+2025-08-09T22:39:18.140247Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:39:24.340649Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("deploy.sh")}
+2025-08-09T22:39:24.340666Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:39:25.040328Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("deploy.sh")}
+2025-08-09T22:39:25.040353Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:39:30.140455Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("deploy.sh")}
+2025-08-09T22:39:30.140472Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:40:24.839340Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".gitignore")}
+2025-08-09T22:40:24.839364Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:41:08.436737Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package.json")}
+2025-08-09T22:41:08.436761Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-09T22:41:08.438696Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
+2025-08-09T22:41:14.936902Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("vercel.json")}
+2025-08-09T22:41:14.936926Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:42:14.634989Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/studio/new/actions.ts")}
+2025-08-09T22:42:14.635016Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:42:35.833916Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/ideas/[id]/page.tsx")}
+2025-08-09T22:42:35.833942Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:42:49.433321Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/ideas/[id]/ActivityList.tsx")}
+2025-08-09T22:42:49.433349Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:43:35.532739Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/lib"), AnchoredSystemPathBuf("apps/web/lib/data.ts")}
+2025-08-09T22:43:35.532756Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:43:36.032234Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/lib/data.ts")}
+2025-08-09T22:43:36.032261Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:43:42.832386Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/studio/new/actions.ts")}
+2025-08-09T22:43:42.832412Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:43:56.531304Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/studio/new/actions.ts")}
+2025-08-09T22:43:56.531356Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:44:10.430547Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/studio/new/actions.ts")}
+2025-08-09T22:44:10.430565Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:44:15.430593Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/studio/new/actions.ts")}
+2025-08-09T22:44:15.430620Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:44:21.132060Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/ideas/[id]/page.tsx")}
+2025-08-09T22:44:21.132087Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:45:24.828526Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/studio/new/actions.ts"), AnchoredSystemPathBuf("apps/web/app/ideas/[id]/ActivityList.tsx"), AnchoredSystemPathBuf("vercel.json"), AnchoredSystemPathBuf("apps/web/lib/data.ts"), AnchoredSystemPathBuf(".github/workflows/deploy.yml"), AnchoredSystemPathBuf("deploy.sh"), AnchoredSystemPathBuf("apps/web/app/ideas/[id]/page.tsx"), AnchoredSystemPathBuf("package.json")}
+2025-08-09T22:45:24.828545Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-09T22:45:24.829557Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
+2025-08-09T22:45:25.327714Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/ideas/[id]/page.tsx"), AnchoredSystemPathBuf("vercel.json"), AnchoredSystemPathBuf("apps/web/app/studio/new/actions.ts"), AnchoredSystemPathBuf(".github/workflows/deploy.yml"), AnchoredSystemPathBuf("package.json"), AnchoredSystemPathBuf("deploy.sh"), AnchoredSystemPathBuf("apps/web/lib/data.ts"), AnchoredSystemPathBuf("apps/web/app/ideas/[id]/ActivityList.tsx")}
+2025-08-09T22:45:25.327742Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-09T22:45:25.329326Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
+2025-08-09T22:45:25.428773Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/studio/new/actions.ts"), AnchoredSystemPathBuf("apps/web/app/ideas/[id]/ActivityList.tsx"), AnchoredSystemPathBuf("apps/web/lib/data.ts"), AnchoredSystemPathBuf("apps/web/app/ideas/[id]/page.tsx")}
+2025-08-09T22:45:25.428800Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-09T22:48:06.138300Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("turbo.json")}
+2025-08-09T22:48:06.138326Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-09T22:48:06.140865Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
+2025-08-09T22:48:06.338582Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("turbo.json")}
+2025-08-09T22:48:06.338602Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-09T22:48:06.339803Z  WARN build:resolve_lockfile: turborepo_repository::package_graph::builder: Issues occurred when constructing package graph. Turbo will function, but some features may not be available: could not resolve workspaces: io error: No such file or directory (os error 2)
