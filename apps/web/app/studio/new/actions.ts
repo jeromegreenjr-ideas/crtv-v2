@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { broadcast } from '../../../lib/eventBus';
 
 // Simple mock orchestrator for deployment
 async function mockOrchestrateIdea(summary: string) {
@@ -107,6 +108,10 @@ export async function generateBriefAndPlan(formData: FormData) {
     ];
     await addEvents(newEvents);
 
+    // Broadcast live updates
+    broadcast(`idea-${idea.id}`, { kind: 'idea.created', data: { summary } });
+    broadcast(`idea-${idea.id}`, { kind: 'brief.generated', data: { idempotencyKey } });
+
     revalidatePath('/ideas/[id]', 'page');
     revalidatePath('/ideas', 'page');
     revalidatePath('/projects', 'page');
@@ -173,6 +178,12 @@ export async function approveBrief(ideaId: number) {
       }
     ];
     await addEvents(newEvents);
+
+    // Broadcast live updates
+    broadcast(`idea-${ideaId}`, { kind: 'brief.approved', data: { ideaId } });
+    broadcast(`idea-${ideaId}`, { kind: 'projects.created', data: { count: 5 } });
+    broadcast(`idea-${ideaId}`, { kind: 'checkpoints.created', data: { count: 5 } });
+    broadcast(`idea-${ideaId}`, { kind: 'tasks.created', data: { count: 3 } });
 
     revalidatePath('/ideas/[id]', 'page');
     revalidatePath('/ideas', 'page');

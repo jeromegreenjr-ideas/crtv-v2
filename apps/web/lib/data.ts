@@ -1,5 +1,5 @@
 import { db } from './db';
-import { ideas, briefs, events, projects, checkpoints, tasks } from './schema';
+import { ideas, briefs, events, projects, checkpoints, tasks } from '@crtv/db';
 import { eq } from 'drizzle-orm';
 
 // In-memory storage for demo purposes (fallback)
