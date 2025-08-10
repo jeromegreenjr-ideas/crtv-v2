@@ -139,6 +139,17 @@ export function getNextEventId() {
   return inMemoryEvents.length + 1;
 }
 
+export async function getEventsByEntity(entityType: string, entityId: number) {
+  try {
+    if (db) {
+      return await db.select().from(events).where(eq(events.entityType as any, entityType as any) as any).then((rows: any[]) => rows.filter((e: any) => e.entityId === entityId));
+    }
+  } catch (e) {
+    console.warn('DB getEventsByEntity failed; using memory', e);
+  }
+  return inMemoryEvents.filter((e) => e.entityType === entityType && e.entityId === entityId);
+}
+
 export function getNextProjectId() {
   return projectIdCounter++;
 }
