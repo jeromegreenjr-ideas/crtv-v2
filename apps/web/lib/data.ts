@@ -1,13 +1,20 @@
 import { db } from './db';
-import { ideas, briefs, events, projects, checkpoints, tasks } from './schema';
+import { ideas, briefs, events, projects, checkpoints, tasks } from '@crtv/db';
 import { eq } from 'drizzle-orm';
 
 // In-memory storage for demo purposes (fallback)
 const inMemoryIdeas: any[] = [];
 const inMemoryBriefs: any[] = [];
 const inMemoryEvents: any[] = [];
+const inMemoryProjects: any[] = [];
+const inMemoryCheckpoints: any[] = [];
+const inMemoryTasks: any[] = [];
+const inMemoryProducerLevels: any[] = [];
 let ideaIdCounter = 1;
 let briefIdCounter = 1;
+let projectIdCounter = 1;
+let checkpointIdCounter = 1;
+let taskIdCounter = 1;
 
 export async function getIdeaData(ideaId: number) {
   try {
@@ -97,6 +104,18 @@ export function getNextEventId() {
   return inMemoryEvents.length + 1;
 }
 
+export function getNextProjectId() {
+  return projectIdCounter++;
+}
+
+export function getNextCheckpointId() {
+  return checkpointIdCounter++;
+}
+
+export function getNextTaskId() {
+  return taskIdCounter++;
+}
+
 // Database helper functions
 export async function getAllIdeas() {
   try {
@@ -127,4 +146,82 @@ export async function updateIdeaStatus(ideaId: number, status: string) {
   if (idea) {
     idea.status = status;
   }
+}
+
+// Projects helpers
+export async function getProjectsByIdea(ideaId: number) {
+  try {
+    if (db) {
+      return await db.select().from(projects).where(eq(projects.ideaId, ideaId));
+    }
+  } catch (error) {
+    console.warn('Database connection failed, using in-memory storage:', error);
+  }
+  return inMemoryProjects.filter(p => p.ideaId === ideaId);
+}
+
+export async function addProjects(newProjects: any[]) {
+  try {
+    if (db) {
+      return await db.insert(projects).values(newProjects).returning();
+    }
+  } catch (error) {
+    console.warn('Database connection failed, using in-memory storage:', error);
+  }
+  for (const p of newProjects) {
+    if (!p.id) p.id = getNextProjectId();
+    inMemoryProjects.push(p);
+  }
+  return newProjects;
+}
+
+export async function addCheckpoints(newCheckpoints: any[]) {
+  try {
+    if (db) {
+      return await db.insert(checkpoints).values(newCheckpoints).returning();
+    }
+  } catch (error) {
+    console.warn('Database connection failed, using in-memory storage:', error);
+  }
+  for (const c of newCheckpoints) {
+    if (!c.id) c.id = getNextCheckpointId();
+    inMemoryCheckpoints.push(c);
+  }
+  return newCheckpoints;
+}
+
+export async function addTasks(newTasks: any[]) {
+  try {
+    if (db) {
+      return await db.insert(tasks).values(newTasks).returning();
+    }
+  } catch (error) {
+    console.warn('Database connection failed, using in-memory storage:', error);
+  }
+  for (const t of newTasks) {
+    if (!t.id) t.id = getNextTaskId();
+    inMemoryTasks.push(t);
+  }
+  return newTasks;
+}
+
+export async function addProducerLevel(entry: { userId: number; tier: string; scores: any; qualityEffort: number; assessedAt?: Date }) {
+  try {
+    if (db) {
+      // @ts-ignore drizzle types available at runtime only
+      const result = await db.insert(producerLevels).values({
+        userId: entry.userId,
+        tier: entry.tier,
+        scores: entry.scores,
+        qualityEffort: Math.round((entry.qualityEffort || 0) * 100),
+        assessedAt: entry.assessedAt ?? new Date(),
+      }).returning();
+      return result[0];
+    }
+  } catch (error) {
+    console.warn('Database connection failed, using in-memory storage:', error);
+  }
+  const rec = { id: inMemoryProducerLevels.length + 1, ...entry, assessedAt: entry.assessedAt ?? new Date() };
+  inMemoryProducerLevels.push(rec);
+  return rec;
 }

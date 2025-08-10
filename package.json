@@ -3,8 +3,8 @@
   "private": true,
   "packageManager": "pnpm@9.0.0",
   "scripts": {
-    "dev": "cd apps/web && npm run dev",
-    "build": "cd apps/web && npm run build",
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
     "lint": "turbo run lint",
     "test": "turbo run test"
   },

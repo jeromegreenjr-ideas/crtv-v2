@@ -2,49 +2,18 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-
-// Simple mock orchestrator for deployment
-async function mockOrchestrateIdea(summary: string) {
-  return {
-    brief: {
-      overview: `AI-generated overview for: ${summary}`,
-      objectives: ['Define project scope', 'Assemble team', 'Create timeline'],
-      audience: 'Project stakeholders and team members',
-      constraints: ['Budget considerations', 'Timeline requirements']
-    },
-    plan: {
-      phases: [
-        { phase: 1, goals: ['Project setup and planning'] },
-        { phase: 2, goals: ['Design and architecture'] },
-        { phase: 3, goals: ['Development and implementation'] },
-        { phase: 4, goals: ['Testing and quality assurance'] },
-        { phase: 5, goals: ['Deployment and launch'] }
-      ]
-    },
-    checkpoints: {
-      checkpoints: [
-        { phase: 1, name: 'Project Setup Complete' },
-        { phase: 2, name: 'Design Review' },
-        { phase: 3, name: 'MVP Ready' },
-        { phase: 4, name: 'QA Complete' },
-        { phase: 5, name: 'Production Deploy' }
-      ]
-    },
-    tasks: {
-      tasks: [
-        { checkpointName: 'Project Setup Complete', title: 'Setup repository', priority: 1 },
-        { checkpointName: 'Project Setup Complete', title: 'Configure CI/CD', priority: 2 },
-        { checkpointName: 'Project Setup Complete', title: 'Team onboarding', priority: 2 }
-      ]
-    }
-  };
-}
+import { broadcast } from '../../../lib/eventBus';
+// Import from workspace source to avoid workspace package resolution in test env
+import { orchestrateIdea, BriefSchema, PhasePlanSchema, CheckpointListSchema, TaskListSchema } from '../../../../../packages/ai/src/index';
 
 const GenerateBriefSchema = z.object({
   summary: z.string().min(1, 'Summary is required'),
 });
 
-import { addIdea, addBrief, addEvents, getNextIdeaId, getNextBriefId, getNextEventId, updateIdeaStatus } from '../../../lib/data';
+import { 
+  addIdea, addBrief, addEvents, getNextIdeaId, getNextBriefId, getNextEventId, updateIdeaStatus,
+  getProjectsByIdea, addProjects, addCheckpoints, addTasks
+} from '../../../lib/data';
 
 export async function generateBriefAndPlan(formData: FormData) {
   try {
@@ -61,7 +30,7 @@ export async function generateBriefAndPlan(formData: FormData) {
     }
 
     const { summary } = validatedFields.data;
-    const idempotencyKey = `idea-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const idempotencyKey = `idea-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
     // Create idea
     const idea = {
@@ -73,15 +42,20 @@ export async function generateBriefAndPlan(formData: FormData) {
     };
     await addIdea(idea);
 
-    // Generate brief and plan via orchestrator
-    const orchestrationResult = await mockOrchestrateIdea(summary);
+    // Generate brief and plan via orchestrator with schema enforcement
+    const orchestrationResult = await orchestrateIdea({ summary, idempotencyKey });
+    // Validate outputs defensively
+    const briefValidated = BriefSchema.parse(orchestrationResult.brief);
+    const planValidated = PhasePlanSchema.parse(orchestrationResult.plan);
+    const checkpointsValidated = CheckpointListSchema.parse(orchestrationResult.checkpoints);
+    const tasksValidated = TaskListSchema.parse(orchestrationResult.tasks);
 
     // Store brief
     const brief = {
       id: getNextBriefId(),
       ideaId: idea.id,
-      content: orchestrationResult.brief,
-      aiMeta: { idempotencyKey },
+      content: briefValidated,
+      aiMeta: { idempotencyKey, plan: planValidated },
       createdAt: new Date(),
     };
     await addBrief(brief);
@@ -107,6 +81,10 @@ export async function generateBriefAndPlan(formData: FormData) {
     ];
     await addEvents(newEvents);
 
+    // Broadcast live updates
+    broadcast(`idea-${idea.id}`, { kind: 'idea.created', data: { summary } });
+    broadcast(`idea-${idea.id}`, { kind: 'brief.generated', data: { idempotencyKey } });
+
     revalidatePath('/ideas/[id]', 'page');
     revalidatePath('/ideas', 'page');
     revalidatePath('/projects', 'page');
@@ -117,10 +95,10 @@ export async function generateBriefAndPlan(formData: FormData) {
       briefId: brief.id,
       data: {
         idea,
-        brief: orchestrationResult.brief,
-        plan: orchestrationResult.plan,
-        checkpoints: orchestrationResult.checkpoints,
-        tasks: orchestrationResult.tasks,
+        brief: briefValidated,
+        plan: planValidated,
+        checkpoints: checkpointsValidated,
+        tasks: tasksValidated,
       },
     };
   } catch (error) {
@@ -134,6 +112,45 @@ export async function generateBriefAndPlan(formData: FormData) {
 
 export async function approveBrief(ideaId: number) {
   try {
+    // Idempotency: if projects already exist for this idea, treat as approved
+    const existingProjects = await getProjectsByIdea(ideaId);
+    if (existingProjects.length > 0) {
+      await updateIdeaStatus(ideaId, 'active');
+      return {
+        success: true,
+        ideaId,
+        message: 'Brief already approved; projects exist',
+        projectsCreated: 0,
+        checkpointsCreated: 0,
+        tasksCreated: 0,
+      };
+    }
+
+    // Create 5 projects (phases 1..5)
+    const newProjects = await addProjects([1,2,3,4,5].map(phase => ({
+      id: undefined,
+      ideaId,
+      phase,
+      status: 'in_progress',
+      progress: 0,
+    })));
+
+    // Create one checkpoint per project for demo
+    const newCheckpoints = await addCheckpoints(newProjects.map((p: any) => ({
+      id: undefined,
+      projectId: p.id,
+      name: `${p.phase}.1 Kickoff`,
+      status: 'open',
+    })));
+
+    // Create some seed tasks for the first checkpoint
+    const firstCheckpoint = newCheckpoints[0];
+    const newTasks = await addTasks([
+      { id: undefined, checkpointId: firstCheckpoint.id, title: 'Scaffold repository', status: 'todo', priority: 1 },
+      { id: undefined, checkpointId: firstCheckpoint.id, title: 'Define design tokens', status: 'todo', priority: 2 },
+      { id: undefined, checkpointId: firstCheckpoint.id, title: 'Board MVP', status: 'todo', priority: 2 },
+    ]);
+
     // Update idea status to active
     await updateIdeaStatus(ideaId, 'active');
 
@@ -152,7 +169,7 @@ export async function approveBrief(ideaId: number) {
         entityType: 'idea',
         entityId: ideaId,
         kind: 'projects.created',
-        data: { count: 5 },
+        data: { count: newProjects.length },
         createdAt: new Date(),
       },
       {
@@ -160,7 +177,7 @@ export async function approveBrief(ideaId: number) {
         entityType: 'idea',
         entityId: ideaId,
         kind: 'checkpoints.created',
-        data: { count: 5 },
+        data: { count: newCheckpoints.length },
         createdAt: new Date(),
       },
       {
@@ -168,11 +185,17 @@ export async function approveBrief(ideaId: number) {
         entityType: 'idea',
         entityId: ideaId,
         kind: 'tasks.created',
-        data: { count: 3 },
+        data: { count: newTasks.length },
         createdAt: new Date(),
       }
     ];
     await addEvents(newEvents);
+
+    // Broadcast live updates
+    broadcast(`idea-${ideaId}`, { kind: 'brief.approved', data: { ideaId } });
+    broadcast(`idea-${ideaId}`, { kind: 'projects.created', data: { count: newProjects.length } });
+    broadcast(`idea-${ideaId}`, { kind: 'checkpoints.created', data: { count: newCheckpoints.length } });
+    broadcast(`idea-${ideaId}`, { kind: 'tasks.created', data: { count: newTasks.length } });
 
     revalidatePath('/ideas/[id]', 'page');
     revalidatePath('/ideas', 'page');
@@ -181,9 +204,9 @@ export async function approveBrief(ideaId: number) {
     return {
       success: true,
       ideaId,
-      projectsCreated: 5,
-      checkpointsCreated: 5,
-      tasksCreated: 3,
+      projectsCreated: newProjects.length,
+      checkpointsCreated: newCheckpoints.length,
+      tasksCreated: newTasks.length,
     };
   } catch (error) {
     console.error('Error approving brief:', error);
