@@ -1,3 +1,31 @@
+# CRTV Studio - Setup
+
+## Required environment variables
+
+Create a `.env` at repo root or set in Vercel:
+
+```
+DATABASE_URL="postgresql://username:password@host:port/database"
+OPENAI_API_KEY="sk-..."
+OPENAI_MODEL="gpt-4o-mini" # or gpt-5-thinking when available
+```
+
+## Database (Neon + Drizzle)
+
+- Provision a Neon Postgres DB and set `DATABASE_URL`.
+- From repo root:
+
+```
+npx drizzle-kit push --config packages/db/drizzle.config.ts
+```
+
+This will apply the schema in `packages/db/src/schema.ts` to your database.
+
+## AI Orchestrator & Producer Assessment
+
+- Set `OPENAI_API_KEY`.
+- The orchestrator and assessment services automatically use OpenAI with JSON schema enforcement when the key is present; otherwise they fall back to deterministic local heuristics for development.
+
 # CRTV Studio
 
 A Turborepo monorepo for streamlining idea development → brief → 5-phase plan → checkpoints → tasks → shipped work.

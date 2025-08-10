@@ -1,4 +1,16 @@
 import { BriefSchema, PhasePlanSchema, CheckpointListSchema, TaskListSchema, type Brief, type PhasePlan, type CheckpointList, type TaskList } from "./schemas";
+import type { ResponseFormatJSONSchema } from "openai/resources/responses.mjs";
+let openai: any = null;
+try {
+  if (process.env.OPENAI_API_KEY) {
+    // Lazy import to avoid bundling in environments where it's not needed
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { default: OpenAI } = require("openai");
+    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+} catch {
+  // ignore if openai not available
+}
 
 export interface OrchestratorInput {
   summary: string;
@@ -28,6 +40,140 @@ export interface OrchestratorTools {
  * Enforces Zod schemas strictly and guarantees JSON-only outputs.
  */
 export async function orchestrateIdea(intake: OrchestratorInput, tools?: OrchestratorTools): Promise<OrchestratorOutput> {
+  // If OpenAI is available and no tools provided, create default tools that enforce JSON via schema
+  if (!tools && openai) {
+    const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+
+    const jsonBriefSchema: ResponseFormatJSONSchema = {
+      type: "json_schema",
+      json_schema: {
+        name: "Brief",
+        schema: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            overview: { type: "string" },
+            objectives: { type: "array", items: { type: "string" }, minItems: 1 },
+            audience: { type: "string" },
+            constraints: { type: "array", items: { type: "string" } }
+          },
+          required: ["overview", "objectives"]
+        }
+      }
+    };
+
+    const jsonPhasePlanSchema: ResponseFormatJSONSchema = {
+      type: "json_schema",
+      json_schema: {
+        name: "PhasePlan",
+        schema: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            phases: {
+              type: "array",
+              minItems: 5,
+              maxItems: 5,
+              items: {
+                type: "object",
+                properties: {
+                  phase: { type: "integer", minimum: 1, maximum: 5 },
+                  goals: { type: "array", items: { type: "string" }, minItems: 1 }
+                },
+                required: ["phase", "goals"],
+                additionalProperties: false
+              }
+            }
+          },
+          required: ["phases"]
+        }
+      }
+    };
+
+    const jsonCheckpointSchema: ResponseFormatJSONSchema = {
+      type: "json_schema",
+      json_schema: {
+        name: "CheckpointList",
+        schema: {
+          type: "object",
+          properties: {
+            checkpoints: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  phase: { type: "integer", minimum: 1, maximum: 5 },
+                  name: { type: "string" }
+                },
+                required: ["phase", "name"],
+                additionalProperties: false
+              }
+            }
+          },
+          required: ["checkpoints"],
+          additionalProperties: false
+        }
+      }
+    };
+
+    const jsonTaskSchema: ResponseFormatJSONSchema = {
+      type: "json_schema",
+      json_schema: {
+        name: "TaskList",
+        schema: {
+          type: "object",
+          properties: {
+            tasks: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  checkpointName: { type: "string" },
+                  title: { type: "string" },
+                  priority: { type: "integer", minimum: 1, maximum: 3 }
+                },
+                required: ["checkpointName", "title"],
+                additionalProperties: false
+              }
+            }
+          },
+          required: ["tasks"],
+          additionalProperties: false
+        }
+      }
+    };
+
+    tools = {
+      async createBrief(summary, context) {
+        const system = "You are an expert project architect. Output ONLY JSON matching the provided schema.";
+        const input = `Summarize into a concise brief with objectives. Context: ${JSON.stringify(context ?? {})}. Summary: ${summary}`;
+        const res = await openai.responses.create({ model, input: [{ role: "system", content: system }, { role: "user", content: input }], response_format: jsonBriefSchema });
+        const text = res.output[0]?.content?.[0]?.text?.value ?? "{}";
+        return BriefSchema.parse(JSON.parse(text));
+      },
+      async createPhasePlan(brief) {
+        const system = "You are an expert project planner. Output ONLY JSON with exactly 5 phases.";
+        const input = `Create a 5-phase plan with explicit goals from this brief: ${JSON.stringify(brief)}`;
+        const res = await openai.responses.create({ model, input: [{ role: "system", content: system }, { role: "user", content: input }], response_format: jsonPhasePlanSchema });
+        const text = res.output[0]?.content?.[0]?.text?.value ?? "{}";
+        return PhasePlanSchema.parse(JSON.parse(text));
+      },
+      async createCheckpoints(plan) {
+        const system = "You are an expert PM. Output ONLY JSON with 3-5 checkpoints per phase.";
+        const input = `Create checkpoints per phase based on: ${JSON.stringify(plan)}`;
+        const res = await openai.responses.create({ model, input: [{ role: "system", content: system }, { role: "user", content: input }], response_format: jsonCheckpointSchema });
+        const text = res.output[0]?.content?.[0]?.text?.value ?? "{}";
+        return CheckpointListSchema.parse(JSON.parse(text));
+      },
+      async createTasks(checkpoints) {
+        const system = "You are a senior producer. Output ONLY JSON with seed tasks for early execution.";
+        const input = `Generate seed tasks per checkpoint from: ${JSON.stringify(checkpoints)}`;
+        const res = await openai.responses.create({ model, input: [{ role: "system", content: system }, { role: "user", content: input }], response_format: jsonTaskSchema });
+        const text = res.output[0]?.content?.[0]?.text?.value ?? "{}";
+        return TaskListSchema.parse(JSON.parse(text));
+      },
+    };
+  }
   const ctx = tools?.getIdeaContext ? await tools.getIdeaContext(intake.summary, intake.context) : (intake.context ?? {});
 
   const brief = tools?.createBrief ? await tools.createBrief(intake.summary, ctx) : BriefSchema.parse({
