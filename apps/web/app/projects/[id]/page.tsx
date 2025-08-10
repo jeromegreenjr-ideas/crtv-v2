@@ -108,7 +108,7 @@ export default async function ProjectDetail({ params }: { params: { id: string }
         <BulkOps projectId={projectId} />
         <div className="card">
           <div className="font-semibold mb-2">Kanban</div>
-          <KanbanClient projectId={projectId} />
+          <KanbanClient projectId={projectId} initialColumns={checkpoints.map((c: any) => ({ id: c.id, name: c.name }))} />
         </div>
       </div>
     </div>

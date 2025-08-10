@@ -4,14 +4,13 @@ import { useEffect, useState } from 'react';
 type Column = { id: number; name: string };
 type Task = { id: number; title: string; checkpointId: number; status: string };
 
-export default function KanbanClient({ projectId }: { projectId: number }) {
-  const [columns, setColumns] = useState<Column[]>([]);
+export default function KanbanClient({ projectId, initialColumns }: { projectId: number; initialColumns: Column[] }) {
+  const [columns, setColumns] = useState<Column[]>(initialColumns || []);
   const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
     fetch(`/api/projects/${projectId}/tasks`).then(r => r.json()).then(j => setTasks(j.tasks || []));
-    // Basic columns list: fetched via server props in page; keep local placeholder
-    fetch(`/api/projects/${projectId}`).then(() => {}).catch(() => {});
+    // Columns provided by server
   }, [projectId]);
 
   function onDrop(e: React.DragEvent<HTMLDivElement>, toCheckpointId: number) {

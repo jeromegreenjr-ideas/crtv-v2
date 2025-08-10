@@ -15,6 +15,8 @@ function badgeFor(status: string) {
 export default function ClientTasks({ initialTasks }: { initialTasks: any[] }) {
   const [tasks, setTasks] = useState(initialTasks || []);
   const [selected, setSelected] = useState<Record<number, boolean>>({});
+  const [commentFor, setCommentFor] = useState<number | null>(null);
+  const [commentText, setCommentText] = useState('');
 
   const grouped = useMemo(() => ({
     todo: tasks.filter((t: any) => t.status === 'todo'),
@@ -51,16 +53,41 @@ export default function ClientTasks({ initialTasks }: { initialTasks: any[] }) {
           ) : (
             <div className="space-y-2">
               {grouped[s as keyof typeof grouped].map((t: any) => (
-                <label key={t.id} className="card flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <input type="checkbox" checked={!!selected[t.id]} onChange={(e) => setSelected(sel => ({ ...sel, [t.id]: e.target.checked }))} />
-                    <div>
-                      <div className="font-medium">{t.title}</div>
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${badgeFor(t.status)}`}>{t.status}</span>
+                <div key={t.id} className="card">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" checked={!!selected[t.id]} onChange={(e) => setSelected(sel => ({ ...sel, [t.id]: e.target.checked }))} />
+                      <div>
+                        <div className="font-medium">{t.title}</div>
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${badgeFor(t.status)}`}>{t.status}</span>
+                      </div>
                     </div>
+                    <div className="text-sm text-gray-600">Due {t.due ? new Date(t.due).toLocaleDateString() : '-'}</div>
                   </div>
-                  <div className="text-sm text-gray-600">Due {t.due ? new Date(t.due).toLocaleDateString() : '-'}</div>
-                </label>
+                  <div className="mt-2 flex items-center gap-2">
+                    <button className="text-xs text-primary-600" onClick={() => setCommentFor(t.id)}>Comment</button>
+                    <button className="text-xs text-primary-600" onClick={async () => {
+                      const url = prompt('Paste file URL');
+                      if (!url) return;
+                      await fetch(`/api/tasks/${t.id}/upload`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: 1, files: [url] }) });
+                    }}>Upload</button>
+                  </div>
+                  {commentFor === t.id && (
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        const text = commentText.trim();
+                        if (!text) return;
+                        await fetch(`/api/tasks/${t.id}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+                        setCommentText(''); setCommentFor(null);
+                      }}
+                      className="mt-2 flex items-center gap-2"
+                    >
+                      <input value={commentText} onChange={(e) => setCommentText(e.target.value)} className="border rounded px-2 py-1 text-sm flex-1" placeholder="Add a comment" />
+                      <button className="btn-secondary text-xs" type="submit">Post</button>
+                    </form>
+                  )}
+                </div>
               ))}
             </div>
           )}
