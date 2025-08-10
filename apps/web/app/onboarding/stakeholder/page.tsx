@@ -12,6 +12,7 @@ export default function StakeholderOnboarding() {
 
   async function submit(formData: FormData) {
     setLoading(true); setError(null);
+    // Show stepper progress via SSE topic assessment-idea-temp; for now optimistic UI
     const res = await onboardStakeholder(formData);
     setLoading(false);
     if ((res as any)?.error) { setError((res as any).error); return; }
@@ -26,8 +27,17 @@ export default function StakeholderOnboarding() {
         <input name="email" className="input-field" placeholder="Your email" value={email} onChange={e=>setEmail(e.target.value)} />
         <textarea name="summary" className="input-field" rows={8} placeholder="Describe your idea" value={summary} onChange={e=>setSummary(e.target.value)} />
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button className="btn-primary" disabled={loading || !email || !summary}>{loading ? 'Submitting...' : 'Generate brief & plan'}</button>
+        <button className="btn-primary" disabled={loading || !email || !summary}>{loading ? 'Assessing Idea...' : 'Generate brief & plan'}</button>
       </form>
+      {loading && (
+        <div className="mt-4">
+          <ol className="grid gap-2 text-sm">
+            <li>1. Uploading</li>
+            <li>2. Analyzing</li>
+            <li>3. Building Preview</li>
+          </ol>
+        </div>
+      )}
       <p className="text-sm text-gray-600 mt-4">We’ll generate your brief and plan, then ask you to create an account to view details.</p>
     </div>
   );

@@ -1,4 +1,5 @@
 import './globals.css';
+import { ToastProvider } from '../components/ToastProvider';
 import type { Metadata, Viewport } from 'next';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
@@ -36,7 +37,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <a className="block hover:underline" href="/communication">Communication</a>
             </nav>
           </aside>
-          <main>{children}</main>
+          <main>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </main>
           <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t grid grid-cols-4 text-sm">
             <a className="p-3 text-center" href="/ideas">Ideas</a>
             <a className="p-3 text-center" href="/projects">Projects</a>
