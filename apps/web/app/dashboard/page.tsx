@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import RequireRole from '../../components/RequireRole';
 import { getUserByEmail, getIdeasByStakeholder, getAllProjects } from '../../lib/data';
+import { Avatar } from '../../components/Avatar';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -54,11 +55,33 @@ export default async function StakeholderDashboard() {
               {ideas.map((i: any) => (
                 <Link key={i.id} href={`/ideas/${i.id}`} className="border rounded-xl p-3 hover:bg-gray-50">
                   <div className="font-medium line-clamp-2">{i.title || i.summary}</div>
-                  <div className="text-sm text-gray-600 mt-1">Status: {i.status}</div>
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="text-sm text-gray-600">Status: {i.status}</div>
+                    <div className="flex -space-x-2">
+                      {[1,2,3].map((n) => (
+                        <Avatar key={n} name={`User ${n}`} size={24} />
+                      ))}
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>
           )}
+        </div>
+
+        <div className="card">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold">Alerts</h2>
+            <Link href="#" className="text-primary-600 text-sm">View all</Link>
+          </div>
+          <ul className="space-y-2">
+            <li className="flex items-center justify-between border rounded-xl p-3">
+              <div>
+                <div className="font-medium">No recent alerts</div>
+                <div className="text-sm text-gray-600">You’re all caught up.</div>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
     </RequireRole>

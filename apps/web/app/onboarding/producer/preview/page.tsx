@@ -15,7 +15,11 @@ export default function ProducerPreview() {
     setProgress({ step: data.step, pct: data.pct });
   });
   useEffect(() => {
-    // TODO: add API for producer preview if needed; keep placeholder rubric for now
+    if (!userId) return;
+    fetch(`/api/producer/${userId}/public`).then(r => r.json()).then((j) => {
+      const preview = j?.preview;
+      if (preview?.rubric?.criteria) setCriteria(preview.rubric.criteria);
+    }).catch(() => {});
   }, [userId]);
   return (
     <div className="min-h-screen max-w-3xl mx-auto p-6">

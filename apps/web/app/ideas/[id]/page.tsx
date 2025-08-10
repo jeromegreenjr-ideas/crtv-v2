@@ -1,8 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getIdeaWithAssessment } from '../../../lib/data';
 import { RubricBreakdown } from '../../../components/RubricBreakdown';
-import { cookies } from 'next/headers';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getProjectsByIdea, getCheckpointsByProject, getTasksByCheckpoint } from '../../../lib/data';
 import ActivityStream from './ActivityStream';
 import { ArrowLeft, CheckCircle, Clock, Users, Target, FileText } from 'lucide-react';
 import Link from 'next/link';
@@ -277,22 +276,117 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
 
         {/* Sections */}
         <div id="projects" className="mt-8" />
-        <div className="card mb-6">
-          <div className="flex items-center space-x-2 mb-4">
-            <Target className="w-6 h-6 text-primary-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Projects</h2>
-          </div>
-          <p className="text-gray-600 text-sm">Project board and phases will appear here.</p>
-        </div>
-        <div id="tasks" className="card mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Tasks</h2>
-          <p className="text-gray-600 text-sm">Tasks related to this idea will be listed here.</p>
-        </div>
+        <ProjectsForIdea ideaId={ideaId} />
+        <div id="tasks" className="mt-6" />
+        <TasksForIdea ideaId={ideaId} />
         <div id="reports" className="card">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Reports</h2>
           <p className="text-gray-600 text-sm">AI assessment details and rollups.</p>
         </div>
       </main>
+    </div>
+  );
+}
+
+async function ProjectsForIdea({ ideaId }: { ideaId: number }) {
+  const projs = await getProjectsByIdea(ideaId);
+  if (projs.length === 0) return (
+    <div className="card mb-6">
+      <div className="flex items-center space-x-2 mb-4">
+        <Target className="w-6 h-6 text-primary-600" />
+        <h2 className="text-xl font-semibold text-gray-900">Projects</h2>
+      </div>
+      <p className="text-gray-600 text-sm">No projects yet. Approve the brief to create structured phases.</p>
+    </div>
+  );
+  return (
+    <div className="card mb-6">
+      <div className="flex items-center space-x-2 mb-4">
+        <Target className="w-6 h-6 text-primary-600" />
+        <h2 className="text-xl font-semibold text-gray-900">Projects</h2>
+      </div>
+      <div className="space-y-4">
+        {await Promise.all(projs.map(async (p: any) => {
+          const cps = await getCheckpointsByProject(p.id);
+          return (
+            <div key={p.id} className="border rounded-xl p-3">
+              <div className="font-semibold mb-2">Phase {p.phase}</div>
+              <div className="space-y-2">
+                {await Promise.all(cps.map(async (cp: any) => {
+                  const ts = await getTasksByCheckpoint(cp.id);
+                  return (
+                    <div key={cp.id} className="border rounded-lg p-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="font-medium">{cp.name}</div>
+                        <div className="text-xs text-gray-600">{ts.length} tasks</div>
+                      </div>
+                      <ul className="flex flex-wrap gap-2">
+                        {ts.slice(0, 5).map((t: any) => (
+                          <li key={t.id} className="px-2 py-0.5 rounded-full text-xs bg-gray-100">{t.title}</li>
+                        ))}
+                        {ts.length === 0 && <li className="text-xs text-gray-600">No tasks</li>}
+                      </ul>
+                    </div>
+                  );
+                }))}
+              </div>
+            </div>
+          );
+        }))}
+      </div>
+    </div>
+  );
+}
+
+async function TasksForIdea({ ideaId }: { ideaId: number }) {
+  const projs = await getProjectsByIdea(ideaId);
+  const allTasks: any[] = [];
+  for (const p of projs as any[]) {
+    const cps = await getCheckpointsByProject(p.id);
+    for (const c of cps as any[]) {
+      const ts = await getTasksByCheckpoint(c.id);
+      for (const t of ts as any[]) {
+        allTasks.push({ ...t, projectPhase: p.phase, checkpointName: c.name });
+      }
+    }
+  }
+  const byStatus = (status: string) => allTasks.filter(t => t.status === status);
+  return (
+    <div className="card mb-6">
+      <h2 className="text-xl font-semibold text-gray-900 mb-3">Tasks</h2>
+      {allTasks.length === 0 ? (
+        <p className="text-gray-600 text-sm">No tasks yet.</p>
+      ) : (
+        <>
+          <div className="flex gap-2 mb-3 text-sm">
+            {['todo','in_progress','review','done'].map((s) => (
+              <a key={s} href={`#task-${s}`} className="px-2 py-0.5 rounded-full bg-gray-100">{s}</a>
+            ))}
+          </div>
+          {['todo','in_progress','review','done'].map((s) => (
+            <div key={s} id={`task-${s}`} className="mb-4">
+              <div className="font-medium mb-2 capitalize">{s.replace('_',' ')}</div>
+              <ul className="space-y-2">
+                {byStatus(s).map((t: any) => (
+                  <li key={t.id} className="border rounded-lg p-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-2 h-2 rounded-full bg-gray-400" />
+                      <div>
+                        <div className="font-medium text-sm">{t.title}</div>
+                        <div className="text-xs text-gray-600">Phase {t.projectPhase} · {t.checkpointName}</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-600">P{t.priority ?? 2}</div>
+                  </li>
+                ))}
+                {byStatus(s).length === 0 && (
+                  <li className="text-sm text-gray-600">No tasks in this status</li>
+                )}
+              </ul>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }
