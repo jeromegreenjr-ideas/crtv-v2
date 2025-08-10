@@ -392,6 +392,56 @@ export async function getProducers(): Promise<any[]> {
   return inMemoryUsers.filter(u => u.role === 'producer');
 }
 
+export async function deleteTasks(taskIds: number[]) {
+  try {
+    if (db) {
+      for (const id of taskIds) {
+        // @ts-ignore
+        await db.delete(tasks).where(eq(tasks.id, id));
+      }
+      return true;
+    }
+  } catch (e) {
+    console.warn('DB deleteTasks failed; memory fallback', e);
+  }
+  for (const id of taskIds) {
+    const idx = inMemoryTasks.findIndex(t => t.id === id);
+    if (idx >= 0) inMemoryTasks.splice(idx, 1);
+  }
+  return true;
+}
+
+export async function splitTask(taskId: number, titles: string[]) {
+  try {
+    if (db) {
+      // Fetch existing to keep checkpointId
+      const rows = await db.select().from(tasks).where(eq(tasks.id, taskId));
+      const base = rows[0];
+      if (!base) return [] as any[];
+      const created: any[] = [];
+      for (const t of titles) {
+        const res = await db.insert(tasks).values({ checkpointId: base.checkpointId as any, title: t, status: 'todo', priority: base.priority as any }).returning();
+        created.push(res[0]);
+      }
+      // @ts-ignore
+      await db.delete(tasks).where(eq(tasks.id, taskId));
+      return created;
+    }
+  } catch (e) {
+    console.warn('DB splitTask failed; memory fallback', e);
+  }
+  const base = inMemoryTasks.find(t => t.id === taskId);
+  if (!base) return [] as any[];
+  const created = titles.map((t) => {
+    const rec = { id: getNextTaskId(), checkpointId: base.checkpointId, title: t, status: 'todo', priority: base.priority };
+    inMemoryTasks.push(rec);
+    return rec;
+  });
+  const idx = inMemoryTasks.findIndex(t => t.id === taskId);
+  if (idx >= 0) inMemoryTasks.splice(idx, 1);
+  return created;
+}
+
 export async function addProducerLevel(entry: { userId: number; tier: string; scores: any; qualityEffort: number; assessedAt?: Date }) {
   try {
     if (db) {

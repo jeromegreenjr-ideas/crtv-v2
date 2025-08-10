@@ -1,6 +1,10 @@
 import { getProject, getCheckpointsByProject, getTasksByCheckpoint, calcCheckpointPct, calcProjectPct } from '../../../lib/data';
 import Link from 'next/link';
 import { ArrowLeft, Plus } from 'lucide-react';
+import dynamic from 'next/dynamic';
+const BulkOps = dynamic(() => import('./bulk-ops'), { ssr: false });
+import { revalidatePath } from 'next/cache';
+import { updateCheckpoint, createTask, setTasksAssignee, shiftCheckpointDue, moveCheckpoint } from '../../../lib/data';
 import RequireRole from '../../../components/RequireRole';
 
 export const dynamic = 'force-dynamic';
@@ -35,8 +39,23 @@ export default async function ProjectDetail({ params }: { params: { id: string }
           return (
             <div key={cp.id} className="card">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="font-semibold">{cp.name}</h2>
-                <div className="text-sm text-gray-600">{pct}%</div>
+                <form action={async (formData: FormData) => {
+                  'use server';
+                  const name = formData.get('name') as string;
+                  const due = formData.get('due') ? new Date(formData.get('due') as string) : null;
+                  await updateCheckpoint(cp.id, { name, due });
+                  revalidatePath(`/projects/${projectId}`);
+                }} className="flex items-center gap-2">
+                  <input name="name" defaultValue={cp.name} className="border rounded px-2 py-1 text-sm" />
+                  <input type="date" name="due" className="border rounded px-2 py-1 text-sm" />
+                  <button className="btn-secondary text-xs" type="submit">Save</button>
+                </form>
+                <div className="flex items-center gap-2">
+                  <form action={async () => { 'use server'; await shiftCheckpointDue(cp.id, 7); revalidatePath(`/projects/${projectId}`); }}>
+                    <button type="submit" className="text-xs text-primary-600">+7d</button>
+                  </form>
+                  <div className="text-sm text-gray-600">{pct}%</div>
+                </div>
               </div>
               <ul className="space-y-2">
                 {tasks.map((t: any) => {
@@ -58,6 +77,12 @@ export default async function ProjectDetail({ params }: { params: { id: string }
                             'use server';
                             await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/app/api/tasks/${t.id}`, { method: 'PATCH', body: JSON.stringify({ status: t.status === 'todo' ? 'in_progress' : 'done' }) } as any);
                           }}>Advance</button>
+                          <button className="text-xs text-primary-600 hover:underline" formAction={async () => {
+                            'use server';
+                            const titles = t.title.includes(':') ? t.title.split(':').map((s: string) => s.trim()).filter(Boolean) : [t.title + ' A', t.title + ' B'];
+                            await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/app/api/tasks/${t.id}/split`, { method: 'POST', body: JSON.stringify({ titles }) } as any);
+                            revalidatePath(`/projects/${projectId}`);
+                          }}>Split</button>
                         </div>
                       </div>
                       <div className="text-sm text-gray-600">P{t.priority ?? 2}</div>
@@ -66,9 +91,20 @@ export default async function ProjectDetail({ params }: { params: { id: string }
                 })}
                 {tasks.length === 0 && <div className="text-sm text-gray-600">No tasks yet.</div>}
               </ul>
+              <form action={async (formData: FormData) => {
+                'use server';
+                const title = formData.get('title') as string;
+                if (!title) return;
+                await createTask(cp.id, title);
+                revalidatePath(`/projects/${projectId}`);
+              }} className="mt-3 flex items-center gap-2">
+                <input name="title" placeholder="New task title" className="border rounded px-2 py-1 text-sm flex-1" />
+                <button className="btn-secondary text-xs" type="submit"><Plus className="w-3 h-3 mr-1"/>Add</button>
+              </form>
             </div>
           );
         }))}
+        <BulkOps projectId={projectId} />
       </div>
     </div>
     </RequireRole>
