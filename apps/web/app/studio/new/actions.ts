@@ -12,7 +12,7 @@ const GenerateBriefSchema = z.object({
 
 import { 
   addIdea, addBrief, addEvents, getNextIdeaId, getNextBriefId, getNextEventId, updateIdeaStatus,
-  getProjectsByIdea, addProjects, addCheckpoints, addTasks
+  getProjectsByIdea, addProjects, addCheckpoints, addTasks, getIdeaData
 } from '../../../lib/data';
 
 export async function generateBriefAndPlan(formData: FormData) {
@@ -55,7 +55,7 @@ export async function generateBriefAndPlan(formData: FormData) {
       id: getNextBriefId(),
       ideaId: idea.id,
       content: briefValidated,
-      aiMeta: { idempotencyKey, plan: planValidated },
+      aiMeta: { idempotencyKey, plan: planValidated, checkpoints: checkpointsValidated, tasks: tasksValidated },
       createdAt: new Date(),
     };
     await addBrief(brief);
@@ -126,8 +126,15 @@ export async function approveBrief(ideaId: number) {
       };
     }
 
-    // Create 5 projects (phases 1..5)
-    const newProjects = await addProjects([1,2,3,4,5].map(phase => ({
+    // Fetch orchestrator outputs from the brief metadata
+    const { brief } = await getIdeaData(ideaId);
+    const plan = brief?.aiMeta?.plan as { phases: { phase: number; goals: string[] }[] } | undefined;
+    const checkpoints = brief?.aiMeta?.checkpoints as { checkpoints: { phase: number; name: string }[] } | undefined;
+    const tasks = brief?.aiMeta?.tasks as { tasks: { checkpointName: string; title: string; priority?: number }[] } | undefined;
+
+    // Create projects from phases
+    const phases = plan?.phases?.length ? plan.phases.map(p => p.phase) : [1,2,3,4,5];
+    const newProjects = await addProjects(phases.map(phase => ({
       id: undefined,
       ideaId,
       phase,
@@ -135,20 +142,32 @@ export async function approveBrief(ideaId: number) {
       progress: 0,
     })));
 
-    // Create one checkpoint per project for demo
-    const newCheckpoints = await addCheckpoints(newProjects.map((p: any) => ({
+    // Create checkpoints from orchestrator output, mapped to their project ids
+    const checkpointsInput = checkpoints?.checkpoints ?? newProjects.map((p: any) => ({ phase: p.phase, name: `${p.phase}.1 Kickoff` }));
+    const projectIdByPhase = new Map<number, number>(newProjects.map((p: any) => [p.phase, p.id] as [number, number]));
+    const newCheckpoints = await addCheckpoints(checkpointsInput.map(cp => ({
       id: undefined,
-      projectId: p.id,
-      name: `${p.phase}.1 Kickoff`,
+      projectId: projectIdByPhase.get(cp.phase)!,
+      name: cp.name,
       status: 'open',
     })));
 
-    // Create some seed tasks for the first checkpoint
-    const firstCheckpoint = newCheckpoints[0];
-    const newTasks = await addTasks([
-      { id: undefined, checkpointId: firstCheckpoint.id, title: 'Scaffold repository', status: 'todo', priority: 1 },
-      { id: undefined, checkpointId: firstCheckpoint.id, title: 'Define design tokens', status: 'todo', priority: 2 },
-      { id: undefined, checkpointId: firstCheckpoint.id, title: 'Board MVP', status: 'todo', priority: 2 },
+    // Create tasks mapped by checkpoint name if provided
+    const tasksInput = tasks?.tasks ?? [];
+    const checkpointIdByName = new Map<string, number>(newCheckpoints.map((c: any) => [c.name, c.id] as [string, number]));
+    const mappedTasks = tasksInput
+      .map(t => ({
+        id: undefined,
+        checkpointId: checkpointIdByName.get(t.checkpointName),
+        title: t.title,
+        status: 'todo',
+        priority: Math.min(3, Math.max(1, t.priority ?? 2))
+      }))
+      .filter(t => !!t.checkpointId) as any[];
+    const newTasks = await addTasks(mappedTasks.length ? mappedTasks : [
+      { id: undefined, checkpointId: newCheckpoints[0].id, title: 'Scaffold repository', status: 'todo', priority: 1 },
+      { id: undefined, checkpointId: newCheckpoints[0].id, title: 'Define design tokens', status: 'todo', priority: 2 },
+      { id: undefined, checkpointId: newCheckpoints[0].id, title: 'Board MVP', status: 'todo', priority: 2 },
     ]);
 
     // Update idea status to active

@@ -1,4 +1,4 @@
-import { BriefSchema, PhasePlanSchema, CheckpointListSchema, TaskListSchema, type Brief, type PhasePlan, type CheckpointList, type TaskList } from "./schemas";
+import { BriefSchema, PhasePlanSchema, CheckpointListSchema, TaskListSchema, IdeaAssessmentSchema, type Brief, type PhasePlan, type CheckpointList, type TaskList, type IdeaAssessment } from "./schemas";
 import type { ResponseFormatJSONSchema } from "openai/resources/responses.mjs";
 let openai: any = null;
 try {
@@ -23,6 +23,7 @@ export interface OrchestratorOutput {
   plan: PhasePlan;
   checkpoints: CheckpointList;
   tasks: TaskList;
+  ideaAssessment?: IdeaAssessment;
 }
 
 // Tool interfaces to be wired to GPT-5 Thinking with JSON schema enforcement later
@@ -172,9 +173,43 @@ export async function orchestrateIdea(intake: OrchestratorInput, tools?: Orchest
         const text = res.output[0]?.content?.[0]?.text?.value ?? "{}";
         return TaskListSchema.parse(JSON.parse(text));
       },
+      async getIdeaContext(summary) {
+        const system = "You are a market analyst and production expert. Output only JSON per schema.";
+        const input = `Assess this idea across market potential, penetration, feasibility, and production. Provide concise rationales. Summary: ${summary}`;
+        const res = await openai.responses.create({ model, input: [{ role: "system", content: system }, { role: "user", content: input }], response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "IdeaAssessment",
+            schema: {
+              type: "object",
+              properties: {
+                assessedAt: { type: "string" },
+                summary: { type: "string" },
+                scores: {
+                  type: "object",
+                  properties: {
+                    marketPotential: { type: "object", properties: { score: { type: "number" }, rationale: { type: "string" } }, required: ["score","rationale"] },
+                    penetration: { type: "object", properties: { score: { type: "number" }, rationale: { type: "string" } }, required: ["score","rationale"] },
+                    feasibility: { type: "object", properties: { score: { type: "number" }, rationale: { type: "string" } }, required: ["score","rationale"] },
+                    production: { type: "object", properties: { score: { type: "number" }, rationale: { type: "string" } }, required: ["score","rationale"] }
+                  },
+                  required: ["marketPotential","penetration","feasibility","production"],
+                  additionalProperties: false
+                },
+                overall: { type: "object", properties: { tier: { type: "string" }, highlights: { type: "array", items: { type: "string" } } }, required: ["tier","highlights"] }
+              },
+              required: ["assessedAt","summary","scores","overall"],
+              additionalProperties: false
+            }
+          }
+        }});
+        const text = res.output[0]?.content?.[0]?.text?.value ?? "{}";
+        return IdeaAssessmentSchema.parse(JSON.parse(text));
+      }
     };
   }
-  const ctx = tools?.getIdeaContext ? await tools.getIdeaContext(intake.summary, intake.context) : (intake.context ?? {});
+  const ctxRaw = tools?.getIdeaContext ? await tools.getIdeaContext(intake.summary, intake.context) : (intake.context ?? {});
+  const ctx = ctxRaw as Record<string, unknown>;
 
   const brief = tools?.createBrief ? await tools.createBrief(intake.summary, ctx) : BriefSchema.parse({
     overview: intake.summary,
@@ -205,5 +240,10 @@ export async function orchestrateIdea(intake: OrchestratorInput, tools?: Orchest
 
   tools?.emitEvent?.('orchestrator.completed', { idempotencyKey: intake.idempotencyKey });
 
-  return { brief, plan, checkpoints, tasks };
+  // Optional idea assessment present in ctxRaw from getIdeaContext
+  const ideaAssessment = (ctxRaw && 'scores' in (ctxRaw as any) && 'overall' in (ctxRaw as any))
+    ? IdeaAssessmentSchema.safeParse(ctxRaw).success ? (ctxRaw as IdeaAssessment) : undefined
+    : undefined;
+
+  return { brief, plan, checkpoints, tasks, ideaAssessment };
 }

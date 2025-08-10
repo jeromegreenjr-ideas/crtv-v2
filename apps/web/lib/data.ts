@@ -1,5 +1,5 @@
 import { db } from './db';
-import { ideas, briefs, events, projects, checkpoints, tasks } from '@crtv/db';
+import { users, ideas, briefs, events, projects, checkpoints, tasks, producerLevels } from '@crtv/db';
 import { eq } from 'drizzle-orm';
 
 // In-memory storage for demo purposes (fallback)
@@ -10,11 +10,13 @@ const inMemoryProjects: any[] = [];
 const inMemoryCheckpoints: any[] = [];
 const inMemoryTasks: any[] = [];
 const inMemoryProducerLevels: any[] = [];
+const inMemoryUsers: any[] = [];
 let ideaIdCounter = 1;
 let briefIdCounter = 1;
 let projectIdCounter = 1;
 let checkpointIdCounter = 1;
 let taskIdCounter = 1;
+let userIdCounter = 1;
 
 export async function getIdeaData(ideaId: number) {
   try {
@@ -148,6 +150,37 @@ export async function updateIdeaStatus(ideaId: number, status: string) {
   }
 }
 
+// Users helpers
+export async function getUserByEmail(email: string) {
+  try {
+    if (db) {
+      const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
+      return rows[0] || null;
+    }
+  } catch (e) {
+    console.warn('DB getUserByEmail failed; using memory', e);
+  }
+  return inMemoryUsers.find(u => u.email === email) || null;
+}
+
+export async function upsertUserByEmail(email: string, role: string) {
+  try {
+    if (db) {
+      const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
+      if (existing.length > 0) return existing[0];
+      const inserted = await db.insert(users).values({ email, role }).returning();
+      return inserted[0];
+    }
+  } catch (e) {
+    console.warn('DB upsertUserByEmail failed; using memory', e);
+  }
+  const existing = inMemoryUsers.find((u) => u.email === email);
+  if (existing) return existing;
+  const user = { id: userIdCounter++, email, role, createdAt: new Date() };
+  inMemoryUsers.push(user);
+  return user;
+}
+
 // Projects helpers
 export async function getProjectsByIdea(ideaId: number) {
   try {
@@ -224,4 +257,73 @@ export async function addProducerLevel(entry: { userId: number; tier: string; sc
   const rec = { id: inMemoryProducerLevels.length + 1, ...entry, assessedAt: entry.assessedAt ?? new Date() };
   inMemoryProducerLevels.push(rec);
   return rec;
+}
+
+// Dashboard queries and rollups
+export async function getIdeasByStakeholder(stakeholderId: number) {
+  try {
+    if (db) {
+      return await db.select().from(ideas).where(eq(ideas.stakeholderId, stakeholderId));
+    }
+  } catch (e) {
+    console.warn('DB getIdeasByStakeholder failed; using memory', e);
+  }
+  return inMemoryIdeas.filter(i => i.stakeholderId === stakeholderId);
+}
+
+export async function getCheckpointsByProject(projectId: number) {
+  try {
+    if (db) {
+      return await db.select().from(checkpoints).where(eq(checkpoints.projectId, projectId));
+    }
+  } catch (e) {
+    console.warn('DB getCheckpointsByProject failed; using memory', e);
+  }
+  return inMemoryCheckpoints.filter(c => c.projectId === projectId);
+}
+
+export async function getTasksByCheckpoint(checkpointId: number) {
+  try {
+    if (db) {
+      return await db.select().from(tasks).where(eq(tasks.checkpointId, checkpointId));
+    }
+  } catch (e) {
+    console.warn('DB getTasksByCheckpoint failed; using memory', e);
+  }
+  return inMemoryTasks.filter(t => t.checkpointId === checkpointId);
+}
+
+export async function computeIdeaProgress(ideaId: number) {
+  const projs = await getProjectsByIdea(ideaId);
+  if (projs.length === 0) return { projects: 0, checkpoints: 0, tasks: 0, completionPct: 0 };
+  let totalTasks = 0;
+  let doneTasks = 0;
+  let totalCheckpoints = 0;
+  let doneCheckpoints = 0;
+  for (const p of projs as any[]) {
+    const cps = await getCheckpointsByProject(p.id);
+    totalCheckpoints += cps.length;
+    for (const c of cps as any[]) {
+      const ts = await getTasksByCheckpoint(c.id);
+      totalTasks += ts.length;
+      doneTasks += ts.filter((t: any) => t.status === 'done').length;
+      if (ts.length > 0 && ts.every((t: any) => t.status === 'done')) doneCheckpoints++;
+    }
+  }
+  const completionPct = totalTasks === 0 ? 0 : Math.round((doneTasks / totalTasks) * 100);
+  return { projects: projs.length, checkpoints: totalCheckpoints, tasks: totalTasks, completionPct };
+}
+
+export async function getLatestProducerLevel(userId: number) {
+  try {
+    if (db) {
+      const rows = await db.select().from(producerLevels).where(eq(producerLevels.userId, userId));
+      return rows.sort((a: any, b: any) => new Date(b.assessedAt || 0).getTime() - new Date(a.assessedAt || 0).getTime())[0] || null;
+    }
+  } catch (e) {
+    console.warn('DB getLatestProducerLevel failed; using memory', e);
+  }
+  const rows = inMemoryProducerLevels.filter((r) => r.userId === userId);
+  rows.sort((a, b) => new Date(b.assessedAt).getTime() - new Date(a.assessedAt).getTime());
+  return rows[0] || null;
 }

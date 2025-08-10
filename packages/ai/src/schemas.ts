@@ -50,3 +50,18 @@ export type PhasePlan = z.infer<typeof PhasePlanSchema>;
 export type CheckpointList = z.infer<typeof CheckpointListSchema>;
 export type TaskList = z.infer<typeof TaskListSchema>;
 export type ProducerAssessment = z.infer<typeof ProducerAssessmentSchema>;
+
+// Idea assessment for stakeholders
+export const IdeaAssessmentSchema = z.object({
+  assessedAt: z.string(),
+  summary: z.string(),
+  scores: z.object({
+    marketPotential: z.object({ score: z.number().min(1).max(10), rationale: z.string() }),
+    penetration: z.object({ score: z.number().min(1).max(10), rationale: z.string() }),
+    feasibility: z.object({ score: z.number().min(1).max(10), rationale: z.string() }),
+    production: z.object({ score: z.number().min(1).max(10), rationale: z.string() }),
+  }),
+  overall: z.object({ tier: z.enum(['Low','Moderate','Strong','Exceptional']), highlights: z.array(z.string()).min(1) })
+});
+
+export type IdeaAssessment = z.infer<typeof IdeaAssessmentSchema>;

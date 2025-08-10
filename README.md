@@ -5,14 +5,16 @@
 Create a `.env` at repo root or set in Vercel:
 
 ```
-DATABASE_URL="postgresql://username:password@host:port/database"
+DATABASE_URL="postgresql://postgres:<your_supabase_db_password>@db.<project-ref>.supabase.co:5432/postgres"
 OPENAI_API_KEY="sk-..."
-OPENAI_MODEL="gpt-4o-mini" # or gpt-5-thinking when available
+OPENAI_MODEL="gpt-4o-mini" # or your GPT-5 Thinking model
+SUPABASE_URL="https://<project-ref>.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="<your_anon_key>"
 ```
 
 ## Database (Neon + Drizzle)
 
-- Provision a Neon Postgres DB and set `DATABASE_URL`.
+- Provision a Neon or Supabase Postgres DB and set `DATABASE_URL`.
 - From repo root:
 
 ```

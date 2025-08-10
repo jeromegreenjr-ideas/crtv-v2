@@ -1,5 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { createServerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
   title: "CRTV Studio",
@@ -7,7 +9,19 @@ export const metadata: Metadata = {
   viewport: "width=device-width, initial-scale=1",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Initialize Supabase on the server for session-aware rendering
+  const cookieStore = cookies();
+  const supabase = createServerClient({
+    cookies: () => cookieStore,
+  }, {
+    supabaseUrl: process.env.SUPABASE_URL!,
+    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  });
+
+  // Optional: prefetch user to drive role-aware UI later
+  await supabase.auth.getUser();
+
   return (
     <html lang="en" className="h-full">
       <body className="min-h-screen bg-gray-50 antialiased">

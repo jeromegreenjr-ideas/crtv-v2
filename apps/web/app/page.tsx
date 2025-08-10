@@ -14,7 +14,7 @@ export default function Home() {
               </div>
               <span className="text-xl font-bold text-gray-900">CRTV Studio</span>
             </div>
-            <nav className="hidden md:flex space-x-8">
+             <nav className="hidden md:flex space-x-8">
               <Link href="/studio/new" className="text-gray-600 hover:text-primary-600 transition-colors">
                 Studio
               </Link>
@@ -24,6 +24,12 @@ export default function Home() {
               <Link href="/ideas" className="text-gray-600 hover:text-primary-600 transition-colors">
                 Ideas
               </Link>
+               <Link href="/signin" className="text-gray-600 hover:text-primary-600 transition-colors">
+                 Sign in
+               </Link>
+               <Link href="/onboarding" className="text-gray-600 hover:text-primary-600 transition-colors">
+                 Get started
+               </Link>
             </nav>
           </div>
         </div>
@@ -57,7 +63,17 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Features Grid */}
+         {/* Role Choice + Core Intent */}
+         <div className="card mb-12">
+           <h2 className="text-2xl font-bold text-gray-900 mb-2">CRTV Studio</h2>
+           <p className="text-gray-600 mb-6">Streamlining ideas through organization and creativity — from intake to 5-phase plans, checkpoints, tasks, and shipped work.</p>
+           <div className="grid sm:grid-cols-2 gap-4">
+             <Link href="/onboarding/stakeholder" className="btn-primary text-center">I have an idea</Link>
+             <Link href="/onboarding/producer" className="btn-secondary text-center">I am a creative</Link>
+           </div>
+         </div>
+
+         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           <div className="card text-center">
             <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
