@@ -7,7 +7,14 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {},
+      colors: {
+        status: {
+          todo: '#94a3b8',
+          in_progress: '#6366f1',
+          review: '#f59e0b',
+          done: '#10b981',
+        },
+      },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
