@@ -293,6 +293,105 @@ export async function addTasks(newTasks: any[]) {
   return newTasks;
 }
 
+export async function updateTask(taskId: number, fields: Partial<{ title: string; status: string; priority: number; assigneeId: number }>) {
+  try {
+    if (db) {
+      // @ts-ignore
+      await db.update(tasks).set(fields).where(eq(tasks.id, taskId));
+      return true;
+    }
+  } catch (e) {
+    console.warn('DB updateTask failed; memory fallback', e);
+  }
+  const t = inMemoryTasks.find(t => t.id === taskId);
+  if (t) Object.assign(t, fields);
+  return true;
+}
+
+export async function createTask(checkpointId: number, title: string, priority = 2) {
+  const record: any = { id: getNextTaskId(), checkpointId, title, status: 'todo', priority };
+  try {
+    if (db) {
+      const res = await db.insert(tasks).values({ checkpointId, title, status: 'todo', priority }).returning();
+      return res[0];
+    }
+  } catch (e) {
+    console.warn('DB createTask failed; memory fallback', e);
+  }
+  inMemoryTasks.push(record);
+  return record;
+}
+
+export async function updateCheckpoint(checkpointId: number, fields: Partial<{ name: string; due: Date | null; status: string; projectId: number }>) {
+  try {
+    if (db) {
+      // @ts-ignore
+      await db.update(checkpoints).set(fields).where(eq(checkpoints.id, checkpointId));
+      return true;
+    }
+  } catch (e) {
+    console.warn('DB updateCheckpoint failed; memory fallback', e);
+  }
+  const c = inMemoryCheckpoints.find(c => c.id === checkpointId);
+  if (c) Object.assign(c, fields);
+  return true;
+}
+
+export async function setTasksAssignee(taskIds: number[], assigneeId: number | null) {
+  try {
+    if (db) {
+      for (const id of taskIds) {
+        // @ts-ignore
+        await db.update(tasks).set({ assigneeId }).where(eq(tasks.id, id));
+      }
+      return true;
+    }
+  } catch (e) {
+    console.warn('DB setTasksAssignee failed; memory fallback', e);
+  }
+  for (const id of taskIds) {
+    const t = inMemoryTasks.find(t => t.id === id);
+    if (t) t.assigneeId = assigneeId;
+  }
+  return true;
+}
+
+export async function shiftCheckpointDue(checkpointId: number, days: number) {
+  try {
+    if (db) {
+      const rows = await db.select().from(checkpoints).where(eq(checkpoints.id, checkpointId));
+      const base = rows[0]?.due ? new Date(rows[0].due) : new Date();
+      const next = new Date(base.getTime() + days * 24 * 60 * 60 * 1000);
+      // @ts-ignore
+      await db.update(checkpoints).set({ due: next }).where(eq(checkpoints.id, checkpointId));
+      return true;
+    }
+  } catch (e) {
+    console.warn('DB shiftCheckpointDue failed; memory fallback', e);
+  }
+  const c = inMemoryCheckpoints.find(c => c.id === checkpointId);
+  const base = c?.due ? new Date(c.due) : new Date();
+  const next = new Date(base.getTime() + days * 24 * 60 * 60 * 1000);
+  if (c) c.due = next;
+  return true;
+}
+
+export async function moveCheckpoint(checkpointId: number, toProjectId: number) {
+  return updateCheckpoint(checkpointId, { projectId: toProjectId });
+}
+
+export async function getProducers(): Promise<any[]> {
+  try {
+    if (db) {
+      const rows = await db.select().from(users).where(eq(users.role, 'producer'));
+      return rows;
+    }
+  } catch (e) {
+    console.warn('DB getProducers failed; memory fallback', e);
+  }
+  return inMemoryUsers.filter(u => u.role === 'producer');
+}
+
 export async function addProducerLevel(entry: { userId: number; tier: string; scores: any; qualityEffort: number; assessedAt?: Date }) {
   try {
     if (db) {

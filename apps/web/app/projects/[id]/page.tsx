@@ -1,4 +1,6 @@
 import { getProject, getCheckpointsByProject, getTasksByCheckpoint, calcCheckpointPct, calcProjectPct } from '../../../lib/data';
+import Link from 'next/link';
+import { ArrowLeft, Plus } from 'lucide-react';
 import RequireRole from '../../../components/RequireRole';
 
 export const dynamic = 'force-dynamic';
@@ -13,9 +15,12 @@ export default async function ProjectDetail({ params }: { params: { id: string }
     <RequireRole allow={["stakeholder","director","pm","producer","hr"]}>
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Project #{project.id} · Phase {project.phase}</h1>
-          <p className="text-gray-600">Idea {project.ideaId} · {project.status}</p>
+        <div className="flex items-center gap-3">
+          <Link href="/projects" className="text-gray-600 hover:text-primary-600 inline-flex items-center"><ArrowLeft className="w-4 h-4 mr-1"/>Back</Link>
+          <div>
+            <h1 className="text-2xl font-semibold">Project #{project.id} · Phase {project.phase}</h1>
+            <p className="text-gray-600">Idea {project.ideaId} · {project.status}</p>
+          </div>
         </div>
         <div className="text-right">
           <div className="text-2xl font-bold">{projectPct}%</div>
@@ -47,7 +52,13 @@ export default async function ProjectDetail({ params }: { params: { id: string }
                     <li key={t.id} className="flex items-center justify-between border rounded-lg p-3">
                       <div>
                         <div className="font-medium">{t.title}</div>
-                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${badge}`}>{t.status}</span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${badge}`}>{t.status}</span>
+                          <button className="text-xs text-primary-600 hover:underline" formAction={async () => {
+                            'use server';
+                            await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/app/api/tasks/${t.id}`, { method: 'PATCH', body: JSON.stringify({ status: t.status === 'todo' ? 'in_progress' : 'done' }) } as any);
+                          }}>Advance</button>
+                        </div>
                       </div>
                       <div className="text-sm text-gray-600">P{t.priority ?? 2}</div>
                     </li>
