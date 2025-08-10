@@ -25,8 +25,24 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className="h-full">
       <body className="min-h-screen bg-gray-50 antialiased">
-        <div className="min-h-screen">
-          {children}
+        <div className="min-h-screen md:grid md:grid-cols-[240px_1fr]">
+          <aside className="hidden md:block border-r bg-white">
+            <nav className="p-4 space-y-2 text-sm">
+              <a className="block hover:underline" href="/ideas">Ideas</a>
+              <a className="block hover:underline" href="/projects">Projects</a>
+              <a className="block hover:underline" href="/tasks">Tasks</a>
+              <a className="block hover:underline" href="/notifications">Notifications</a>
+              <a className="block hover:underline" href="/reports">Reports</a>
+              <a className="block hover:underline" href="/communication">Communication</a>
+            </nav>
+          </aside>
+          <main>{children}</main>
+          <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t grid grid-cols-4 text-sm">
+            <a className="p-3 text-center" href="/ideas">Ideas</a>
+            <a className="p-3 text-center" href="/projects">Projects</a>
+            <a className="p-3 text-center" href="/tasks">Tasks</a>
+            <a className="p-3 text-center" href="/notifications">Alerts</a>
+          </nav>
         </div>
       </body>
     </html>
