@@ -10,6 +10,8 @@
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.673.0",
+    "@aws-sdk/s3-request-presigner": "^3.673.0",
     "@crtv/ai": "workspace:*",
     "@crtv/db": "workspace:*",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
