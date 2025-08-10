@@ -130,6 +130,7 @@ export const ideaProfiles = pgTable("idea_profiles", {
   title: varchar("title", { length: 255 }),
   overview: varchar("overview", { length: 2048 }),
   metrics: jsonb("metrics"), // tasks/phases/timeline
+  isPublic: boolean("is_public").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

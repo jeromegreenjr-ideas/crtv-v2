@@ -25,6 +25,9 @@ export default function SignInPage() {
     // After sign-in, route based on role
     try {
       const who = await fetch('/api/whoami', { cache: 'no-store' }).then(r => r.json());
+      const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+      const next = params.get('next');
+      if (next) { router.push(next); return; }
       if (who?.role === 'producer') router.push('/dashboard/producer');
       else router.push('/dashboard/stakeholder');
     } catch {
