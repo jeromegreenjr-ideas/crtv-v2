@@ -11,7 +11,9 @@ export const users = pgTable("users", {
 export const ideas = pgTable("ideas", {
   id: serial("id").primaryKey(),
   stakeholderId: integer("stakeholder_id").notNull(),
-  status: varchar("status", { length: 32 }).notNull().default("draft"),
+  title: varchar("title", { length: 255 }),
+  market: varchar("market", { length: 255 }),
+  status: varchar("status", { length: 32 }).notNull().default("submitted"),
   summary: varchar("summary", { length: 2048 }),
   context: jsonb("context"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -84,9 +86,12 @@ export const events = pgTable("events", {
 export const ideaAssessments = pgTable("idea_assessments", {
   id: serial("id").primaryKey(),
   ideaId: integer("idea_id").notNull(),
-  rubric: jsonb("rubric"),
-  scores: jsonb("scores"),
-  overall: jsonb("overall"),
+  overallScore: varchar("overall_score", { length: 16 }), // store as string to avoid decimal typing issues
+  phases: integer("phases"),
+  estTimeline: varchar("est_timeline", { length: 255 }),
+  tasksCount: integer("tasks_count"),
+  rubric: jsonb("rubric"), // {criteria:[{key,label,weight,score,reason}], total, notes}
+  preview: jsonb("preview"),
   assessedAt: timestamp("assessed_at").defaultNow(),
 });
 
@@ -111,6 +116,9 @@ export const producerProfiles = pgTable("producer_profiles", {
   tier: varchar("tier", { length: 32 }),
   category: varchar("category", { length: 64 }),
   links: jsonb("links"),
+  crtvTier: integer("crtv_tier"),
+  publicSlug: varchar("public_slug", { length: 96 }),
+  isPublic: boolean("is_public").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -122,5 +130,27 @@ export const ideaProfiles = pgTable("idea_profiles", {
   title: varchar("title", { length: 255 }),
   overview: varchar("overview", { length: 2048 }),
   metrics: jsonb("metrics"), // tasks/phases/timeline
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// New: producer assessments
+export const producerAssessments = pgTable("producer_assessments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  overallScore: varchar("overall_score", { length: 16 }),
+  rubric: jsonb("rubric"),
+  files: jsonb("files"),
+  categories: jsonb("categories"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// New: uploads registry
+export const uploads = pgTable("uploads", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id"),
+  type: varchar("type", { length: 32 }),
+  url: varchar("url", { length: 2048 }),
+  size: integer("size"),
+  mime: varchar("mime", { length: 128 }),
   createdAt: timestamp("created_at").defaultNow(),
 });

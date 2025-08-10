@@ -1,5 +1,5 @@
 import { db } from './db';
-import { users, ideas, briefs, events, projects, checkpoints, tasks, producerLevels } from '@crtv/db';
+import { users, ideas, briefs, events, projects, checkpoints, tasks, producerLevels, ideaAssessments, producerAssessments, producerProfiles, uploads, ideaProfiles } from '@crtv/db';
 import { eq } from 'drizzle-orm';
 
 // In-memory storage for demo purposes (fallback)
@@ -62,6 +62,11 @@ export async function addIdea(idea: any) {
   return idea;
 }
 
+export async function createIdea(input: { stakeholderId: number; title?: string; summary?: string; market?: string; context?: any }) {
+  const record = { id: getNextIdeaId(), stakeholderId: input.stakeholderId, title: input.title, summary: input.summary, market: input.market, status: 'submitted', context: input.context, createdAt: new Date() };
+  return addIdea(record);
+}
+
 export async function addBrief(brief: any) {
   try {
     // Try to add to database first if available
@@ -92,6 +97,33 @@ export async function addEvents(newEvents: any[]) {
   // Fallback to in-memory storage
   inMemoryEvents.push(...newEvents);
   return newEvents;
+}
+
+export async function saveIdeaAssessment(ideaId: number, data: any) {
+  try {
+    if (db) {
+      const res = await db.insert(ideaAssessments).values({ ideaId, ...data }).returning();
+      return res[0];
+    }
+  } catch (e) {
+    console.warn('DB saveIdeaAssessment failed; memory fallback', e);
+  }
+  const rec = { id: (inMemoryEvents.length + 1), ideaId, ...data, assessedAt: new Date() };
+  inMemoryEvents.push({ id: getNextEventId(), entityType: 'idea', entityId: ideaId, kind: 'idea.assessed', data: {}, createdAt: new Date() });
+  return rec;
+}
+
+export async function getIdeaWithAssessment(ideaId: number) {
+  const base = await getIdeaData(ideaId);
+  try {
+    if (db) {
+      const rows = await db.select().from(ideaAssessments).where(eq(ideaAssessments.ideaId, ideaId));
+      return { ...base, assessment: rows[0] || null };
+    }
+  } catch (e) {
+    // ignore
+  }
+  return { ...base, assessment: null };
 }
 
 export function getNextIdeaId() {
@@ -257,6 +289,130 @@ export async function addProducerLevel(entry: { userId: number; tier: string; sc
   const rec = { id: inMemoryProducerLevels.length + 1, ...entry, assessedAt: entry.assessedAt ?? new Date() };
   inMemoryProducerLevels.push(rec);
   return rec;
+}
+
+export async function saveProducerAssessment(userId: number, data: any) {
+  try {
+    if (db) {
+      const res = await db.insert(producerAssessments).values({ userId, ...data }).returning();
+      return res[0];
+    }
+  } catch (e) {
+    console.warn('DB saveProducerAssessment failed; memory fallback', e);
+  }
+  return { id: Date.now(), userId, ...data, createdAt: new Date() };
+}
+
+export async function createOrUpdateProducerProfile(userId: number, data: any) {
+  try {
+    if (db) {
+      const existing = await db.select().from(producerProfiles).where(eq(producerProfiles.userId, userId)).limit(1);
+      if (existing.length) {
+        // @ts-ignore
+        await db.update(producerProfiles).set(data).where(eq(producerProfiles.userId, userId));
+        return { ...existing[0], ...data };
+      }
+      const res = await db.insert(producerProfiles).values({ userId, ...data }).returning();
+      return res[0];
+    }
+  } catch (e) {
+    console.warn('DB createOrUpdateProducerProfile failed; memory fallback', e);
+  }
+  return { id: Date.now(), userId, ...data, createdAt: new Date() };
+}
+
+export async function getProducerProfile(userId: number) {
+  try {
+    if (db) {
+      const rows = await db.select().from(producerProfiles).where(eq(producerProfiles.userId, userId)).limit(1);
+      return rows[0] || null;
+    }
+  } catch (e) {
+    console.warn('DB getProducerProfile failed; memory fallback', e);
+  }
+  return null;
+}
+
+export async function getProducerProfileBySlug(slug: string) {
+  try {
+    if (db) {
+      const rows = await db.select().from(producerProfiles).where(eq(producerProfiles.publicSlug, slug)).limit(1);
+      return rows[0] || null;
+    }
+  } catch (e) {
+    console.warn('DB getProducerProfileBySlug failed; memory fallback', e);
+  }
+  return null;
+}
+
+export async function saveUploads(userId: number, files: Array<{ url: string; size?: number; mime?: string; type: string }>) {
+  try {
+    if (db) {
+      const res = await db.insert(uploads).values(files.map(f => ({ userId, ...f }))).returning();
+      return res;
+    }
+  } catch (e) {
+    console.warn('DB saveUploads failed; memory fallback', e);
+  }
+  return files.map((f, idx) => ({ id: Date.now() + idx, userId, ...f, createdAt: new Date() }));
+}
+
+export async function createIdeaProfile(ideaId: number, data: any) {
+  try {
+    if (db) {
+      const res = await db.insert(ideaProfiles).values({ ideaId, ...data }).returning();
+      return res[0];
+    }
+  } catch (e) {
+    console.warn('DB createIdeaProfile failed; memory fallback', e);
+  }
+  return { id: Date.now(), ideaId, ...data };
+}
+
+export async function getIdeaProfileByIdeaId(ideaId: number) {
+  try {
+    if (db) {
+      const rows = await db.select().from(ideaProfiles).where(eq(ideaProfiles.ideaId, ideaId)).limit(1);
+      return rows[0] || null;
+    }
+  } catch (e) {
+    console.warn('DB getIdeaProfileByIdeaId failed; memory fallback', e);
+  }
+  return null;
+}
+
+export async function getLatestProducerAssessment(userId: number) {
+  try {
+    if (db) {
+      const rows = await db.select().from(producerAssessments).where(eq(producerAssessments.userId, userId));
+      return rows.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())[0] || null;
+    }
+  } catch (e) {
+    console.warn('DB getLatestProducerAssessment failed; memory fallback', e);
+  }
+  return null;
+}
+
+export async function getUploadsByUser(userId: number, type?: string, limit = 12) {
+  try {
+    if (db) {
+      // Drizzle Lite: no orderBy here; client can sort if needed
+      let rows = await db.select().from(uploads).where(eq(uploads.userId, userId));
+      if (type) rows = rows.filter((r: any) => r.type === type);
+      rows.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      return rows.slice(0, limit);
+    }
+  } catch (e) {
+    console.warn('DB getUploadsByUser failed; memory fallback', e);
+  }
+  return [];
+}
+
+export async function getIdeaPublic(ideaId: number) {
+  const ideaPack = await getIdeaWithAssessment(ideaId);
+  const profile = await getIdeaProfileByIdeaId(ideaId);
+  const preview = ideaPack.assessment?.preview || profile?.metrics || null;
+  return { idea: ideaPack.idea, preview, profile };
 }
 
 // Dashboard queries and rollups
