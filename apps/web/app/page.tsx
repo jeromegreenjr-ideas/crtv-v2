@@ -15,19 +15,19 @@ export default function Home() {
               <span className="text-xl font-bold text-gray-900">CRTV Studio</span>
             </div>
              <nav className="hidden md:flex space-x-8">
-              <Link href="/studio/new" className="text-gray-600 hover:text-primary-600 transition-colors">
+             <Link href="/studio/new" className="text-gray-600 hover:text-blue-600 transition-colors">
                 Studio
               </Link>
-              <Link href="/projects" className="text-gray-600 hover:text-primary-600 transition-colors">
+                <Link href="/projects" className="text-gray-600 hover:text-blue-600 transition-colors">
                 Projects
               </Link>
-              <Link href="/ideas" className="text-gray-600 hover:text-primary-600 transition-colors">
+                <Link href="/ideas" className="text-gray-600 hover:text-blue-600 transition-colors">
                 Ideas
               </Link>
-               <Link href="/signin" className="text-gray-600 hover:text-primary-600 transition-colors">
+                <Link href="/signin" className="text-gray-600 hover:text-blue-600 transition-colors">
                  Sign in
                </Link>
-               <Link href="/onboarding" className="text-gray-600 hover:text-primary-600 transition-colors">
+               <Link href="/onboarding" className="text-gray-600 hover:text-blue-600 transition-colors">
                  Get started
                </Link>
             </nav>
