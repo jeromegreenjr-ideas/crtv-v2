@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { onboardProducer } from '../actions';
+import { useEventSource } from '../../../hooks/useEventSource';
 
 export default function ProducerOnboarding() {
   const [email, setEmail] = useState('');
@@ -15,7 +16,8 @@ export default function ProducerOnboarding() {
     const res = await onboardProducer(formData);
     setLoading(false);
     if ((res as any)?.error) { setError((res as any).error); return; }
-    router.push(`/onboarding/producer/preview`);
+    const userId = (res as any)?.userId;
+    router.push(`/onboarding/producer/preview${userId ? `?userId=${userId}` : ''}`);
   }
 
   return (

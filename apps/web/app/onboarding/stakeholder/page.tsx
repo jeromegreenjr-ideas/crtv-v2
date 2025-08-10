@@ -12,12 +12,12 @@ export default function StakeholderOnboarding() {
 
   async function submit(formData: FormData) {
     setLoading(true); setError(null);
-    // Show stepper progress via SSE topic assessment-idea-temp; for now optimistic UI
     const res = await onboardStakeholder(formData);
     setLoading(false);
     if ((res as any)?.error) { setError((res as any).error); return; }
     // Incentivize sign up: show preview page before sign in
-    router.push(`/onboarding/stakeholder/preview`);
+    const ideaId = (res as any)?.ideaId;
+    router.push(`/onboarding/stakeholder/preview${ideaId ? `?ideaId=${ideaId}` : ''}`);
   }
 
   return (

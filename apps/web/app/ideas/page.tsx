@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getAllIdeas } from '../../lib/data';
+import { Skeleton } from '../../components/Skeleton';
 import { ArrowLeft, Plus, Lightbulb, Clock, CheckCircle, Sparkles } from 'lucide-react';
 
 export default async function IdeasPage() {
