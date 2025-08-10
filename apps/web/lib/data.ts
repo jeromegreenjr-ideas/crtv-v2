@@ -9,6 +9,7 @@ const inMemoryEvents: any[] = [];
 const inMemoryProjects: any[] = [];
 const inMemoryCheckpoints: any[] = [];
 const inMemoryTasks: any[] = [];
+const inMemoryMeetings: any[] = [];
 const inMemoryProducerLevels: any[] = [];
 const inMemoryUsers: any[] = [];
 let ideaIdCounter = 1;
@@ -148,6 +149,21 @@ export function getNextCheckpointId() {
 
 export function getNextTaskId() {
   return taskIdCounter++;
+}
+
+// Meetings (simple persistence; DB table may not exist yet in @crtv/db)
+export async function createMeeting(entry: { projectId?: number; checkpointId?: number; title: string; startAt?: string; duration?: number; attendees?: string[]; agenda?: string; notes?: string }) {
+  const rec = { id: inMemoryMeetings.length + 1, createdAt: new Date(), ...entry };
+  inMemoryMeetings.push(rec);
+  return rec;
+}
+
+export async function getMeetingsByCheckpoint(checkpointId: number) {
+  return inMemoryMeetings.filter(m => m.checkpointId === checkpointId);
+}
+
+export async function getMeetingsByProject(projectId: number) {
+  return inMemoryMeetings.filter(m => m.projectId === projectId);
 }
 
 // Database helper functions
