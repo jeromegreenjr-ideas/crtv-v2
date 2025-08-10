@@ -1,4 +1,44 @@
 import Link from 'next/link';
+import { getAllProjects, calcProjectPct } from '../../lib/data';
+
+export const dynamic = 'force-dynamic';
+
+export default async function ProjectsPage() {
+  const list = await getAllProjects();
+  return (
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">Projects</h1>
+        <Link href="/studio/new" className="btn-primary">New idea</Link>
+      </div>
+      {list.length === 0 ? (
+        <div className="card text-center">No projects yet.</div>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-4">
+          {await Promise.all(list.map(async (p: any) => {
+            const pct = await calcProjectPct(p.id);
+            return (
+              <Link key={p.id} href={`/projects/${p.id}`} className="card hover:shadow-md transition">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold">Phase {p.phase}</h3>
+                    <div className="text-gray-600 text-sm">Idea {p.ideaId}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xl font-bold">{pct}%</div>
+                    <div className="text-gray-600 text-sm">complete</div>
+                  </div>
+                </div>
+              </Link>
+            );
+          }))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+import Link from 'next/link';
 import { getAllIdeas } from '../../lib/data';
 import { ArrowLeft, Plus, Target, Clock, CheckCircle, Sparkles, Users } from 'lucide-react';
 

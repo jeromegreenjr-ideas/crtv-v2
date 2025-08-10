@@ -225,6 +225,29 @@ export async function getProjectsByIdea(ideaId: number) {
   return inMemoryProjects.filter(p => p.ideaId === ideaId);
 }
 
+export async function getAllProjects() {
+  try {
+    if (db) {
+      return await db.select().from(projects);
+    }
+  } catch (e) {
+    console.warn('DB getAllProjects failed; using memory', e);
+  }
+  return inMemoryProjects;
+}
+
+export async function getProject(projectId: number) {
+  try {
+    if (db) {
+      const rows = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1);
+      return rows[0] || null;
+    }
+  } catch (e) {
+    console.warn('DB getProject failed; using memory', e);
+  }
+  return inMemoryProjects.find(p => p.id === projectId) || null;
+}
+
 export async function addProjects(newProjects: any[]) {
   try {
     if (db) {
@@ -438,6 +461,17 @@ export async function getCheckpointsByProject(projectId: number) {
   return inMemoryCheckpoints.filter(c => c.projectId === projectId);
 }
 
+export async function getTasksByAssignee(userId: number) {
+  try {
+    if (db) {
+      return await db.select().from(tasks).where(eq(tasks.assigneeId, userId));
+    }
+  } catch (e) {
+    console.warn('DB getTasksByAssignee failed; using memory', e);
+  }
+  return inMemoryTasks.filter(t => t.assigneeId === userId);
+}
+
 export async function getTasksByCheckpoint(checkpointId: number) {
   try {
     if (db) {
@@ -469,6 +503,29 @@ export async function computeIdeaProgress(ideaId: number) {
   const completionPct = totalTasks === 0 ? 0 : Math.round((doneTasks / totalTasks) * 100);
   return { projects: projs.length, checkpoints: totalCheckpoints, tasks: totalTasks, completionPct };
 }
+
+export function calcCheckpointPct(checkpointTasks: any[]): number {
+  if (!checkpointTasks || checkpointTasks.length === 0) return 0;
+  let total = 0;
+  for (const t of checkpointTasks) {
+    const status = t.status;
+    const w = status === 'done' ? 1 : status === 'in_progress' ? 0.5 : status === 'blocked' ? 0.25 : 0;
+    total += w;
+  }
+  return Math.round((total / checkpointTasks.length) * 100);
+}
+
+export async function calcProjectPct(projectId: number): Promise<number> {
+  const cps = await getCheckpointsByProject(projectId);
+  if (cps.length === 0) return 0;
+  let sum = 0;
+  for (const c of cps as any[]) {
+    const ts = await getTasksByCheckpoint(c.id);
+    sum += calcCheckpointPct(ts);
+  }
+  return Math.round(sum / cps.length);
+}
+
 
 export async function getLatestProducerLevel(userId: number) {
   try {
