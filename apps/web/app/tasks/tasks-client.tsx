@@ -53,7 +53,7 @@ export default function ClientTasks({ initialTasks }: { initialTasks: any[] }) {
           ) : (
             <div className="space-y-2">
               {grouped[s as keyof typeof grouped].map((t: any) => (
-                <div key={t.id} className="card">
+                <div key={t.id} className="card" role="group" aria-label={`Task ${t.title}`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <input type="checkbox" checked={!!selected[t.id]} onChange={(e) => setSelected(sel => ({ ...sel, [t.id]: e.target.checked }))} />

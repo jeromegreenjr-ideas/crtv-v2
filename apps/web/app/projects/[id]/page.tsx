@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 const BulkOps = dynamic(() => import('./bulk-ops'), { ssr: false });
 const KanbanClient = dynamic(() => import('./kanban-client'), { ssr: false });
 import { revalidatePath } from 'next/cache';
+import ProgressBar from '../../../components/ProgressBar';
 import { updateCheckpoint, createTask, setTasksAssignee, shiftCheckpointDue, moveCheckpoint } from '../../../lib/data';
 import RequireRole from '../../../components/RequireRole';
 
@@ -27,9 +28,9 @@ export default async function ProjectDetail({ params }: { params: { id: string }
             <p className="text-gray-600">Idea {project.ideaId} · {project.status}</p>
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold">{projectPct}%</div>
-          <div className="text-gray-600 text-sm">complete</div>
+        <div className="text-right w-48">
+          <div className="text-xs text-gray-600 mb-1">{projectPct}% complete</div>
+          <ProgressBar value={projectPct} label={`Project ${project.id} completion`} />
         </div>
       </header>
 
@@ -51,11 +52,13 @@ export default async function ProjectDetail({ params }: { params: { id: string }
                   <input type="date" name="due" className="border rounded px-2 py-1 text-sm" />
                   <button className="btn-secondary text-xs" type="submit">Save</button>
                 </form>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-48">
                   <form action={async () => { 'use server'; await shiftCheckpointDue(cp.id, 7); revalidatePath(`/projects/${projectId}`); }}>
                     <button type="submit" className="text-xs text-primary-600">+7d</button>
                   </form>
-                  <div className="text-sm text-gray-600">{pct}%</div>
+                  <div className="flex-1">
+                    <ProgressBar value={pct} label={`Checkpoint ${cp.id} completion`} />
+                  </div>
                 </div>
               </div>
               <ul className="space-y-2">

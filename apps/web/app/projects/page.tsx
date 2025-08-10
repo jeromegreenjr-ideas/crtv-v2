@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getAllProjects, calcProjectPct } from '../../lib/data';
+import ProgressBar from '../../components/ProgressBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,9 +28,9 @@ export default async function ProjectsPage() {
                     <h3 className="font-semibold">Phase {p.phase}</h3>
                     <div className="text-gray-600 text-sm">Idea {p.ideaId}</div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-xl font-bold">{pct}%</div>
-                    <div className="text-gray-600 text-sm">complete</div>
+                  <div className="text-right w-40">
+                    <div className="text-xs text-gray-600 mb-1">{pct}% complete</div>
+                    <ProgressBar value={pct} label={`Project ${p.id} completion`} />
                   </div>
                 </div>
               </Link>
