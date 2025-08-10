@@ -79,3 +79,48 @@ export const events = pgTable("events", {
   data: jsonb("data"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// New: idea assessments (rubric + scores)
+export const ideaAssessments = pgTable("idea_assessments", {
+  id: serial("id").primaryKey(),
+  ideaId: integer("idea_id").notNull(),
+  rubric: jsonb("rubric"),
+  scores: jsonb("scores"),
+  overall: jsonb("overall"),
+  assessedAt: timestamp("assessed_at").defaultNow(),
+});
+
+// New: media assets for uploads/links
+export const mediaAssets = pgTable("media_assets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id"),
+  ideaId: integer("idea_id"),
+  kind: varchar("kind", { length: 32 }), // link|image|video|file
+  url: varchar("url", { length: 2048 }),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// New: public producer profiles
+export const producerProfiles = pgTable("producer_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  username: varchar("username", { length: 64 }).notNull(),
+  displayName: varchar("display_name", { length: 128 }),
+  bio: varchar("bio", { length: 1024 }),
+  tier: varchar("tier", { length: 32 }),
+  category: varchar("category", { length: 64 }),
+  links: jsonb("links"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// New: public idea profiles (shareable)
+export const ideaProfiles = pgTable("idea_profiles", {
+  id: serial("id").primaryKey(),
+  ideaId: integer("idea_id").notNull(),
+  slug: varchar("slug", { length: 96 }).notNull(),
+  title: varchar("title", { length: 255 }),
+  overview: varchar("overview", { length: 2048 }),
+  metrics: jsonb("metrics"), // tasks/phases/timeline
+  createdAt: timestamp("created_at").defaultNow(),
+});
