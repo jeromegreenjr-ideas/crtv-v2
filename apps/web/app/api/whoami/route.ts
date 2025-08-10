@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
-import { getUserByEmail, upsertUserByEmail } from '../../../lib/data';
+import { getUserByEmail, upsertUserByEmail, getProducerProfile } from '../../../lib/data';
 
 export const runtime = 'nodejs';
 
@@ -18,8 +18,14 @@ export async function GET() {
   // Map auth email to DB user; do not overwrite role if user exists
   const existing = await getUserByEmail(user.email);
   const dbUser = existing || await upsertUserByEmail(user.email, 'stakeholder');
-
-  return NextResponse.json({ authenticated: true, email: user.email, id: dbUser.id, role: dbUser.role });
+  const producerProfile = dbUser.role === 'producer' ? await getProducerProfile(dbUser.id) : null;
+  return NextResponse.json({
+    authenticated: true,
+    email: user.email,
+    id: dbUser.id,
+    role: dbUser.role,
+    profile: producerProfile ? { slug: producerProfile.publicSlug, tier: producerProfile.crtvTier } : null,
+  });
 }
 
 
