@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { getLatestProducerLevel } from '../../../lib/data';
 
 export default async function ProducerDashboard() {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+    ? createServerComponentClient({ cookies })
+    : null as any;
   const { data } = await supabase.auth.getUser();
   const user = data.user;
 
