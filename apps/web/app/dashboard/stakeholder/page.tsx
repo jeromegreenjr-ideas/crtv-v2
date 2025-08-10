@@ -1,11 +1,10 @@
-import { createPagesServerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { getIdeasByStakeholder, computeIdeaProgress, getUserByEmail } from '../../../lib/data';
 
 export default async function StakeholderDashboard() {
-  const cookieStore = cookies();
-  const supabase = createPagesServerClient({ cookies: () => cookieStore });
+  const supabase = createServerComponentClient({ cookies });
   const { data } = await supabase.auth.getUser();
   const user = data.user;
 
