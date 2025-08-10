@@ -1,5 +1,8 @@
 import { notFound } from 'next/navigation';
-import { getIdeaData } from '../../../lib/data';
+import { getIdeaWithAssessment } from '../../../lib/data';
+import { RubricBreakdown } from '../../../components/RubricBreakdown';
+import { cookies } from 'next/headers';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import ActivityStream from './ActivityStream';
 import { ArrowLeft, CheckCircle, Clock, Users, Target, FileText } from 'lucide-react';
 import Link from 'next/link';
@@ -16,7 +19,7 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
   }
 
   // Get idea data from database (with fallback to in-memory storage)
-  const { idea, brief, events } = await getIdeaData(ideaId);
+  const { idea, brief, events, assessment } = await getIdeaWithAssessment(ideaId) as any;
 
   if (!idea) {
     notFound();
@@ -40,7 +43,7 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Idea Header */}
+        {/* Idea Header + Tabs */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -87,11 +90,20 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
               </form>
             )}
           </div>
+          <div className="mt-4 border-t pt-4">
+            <div className="flex gap-3 text-sm">
+              <a href={`#overview`} className="px-3 py-1 rounded-full bg-gray-100">Overview</a>
+              <a href={`#projects`} className="px-3 py-1 rounded-full bg-gray-100">Projects</a>
+              <a href={`#tasks`} className="px-3 py-1 rounded-full bg-gray-100">Tasks</a>
+              <a href={`#reports`} className="px-3 py-1 rounded-full bg-gray-100">Reports</a>
+            </div>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            <div id="overview" />
             {/* Brief Section */}
             {brief && (
               <div className="card">
@@ -141,6 +153,21 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Assessment Overview */}
+            {assessment?.rubric?.criteria && (
+              <div className="card">
+                <div className="flex items-center space-x-2 mb-6">
+                  <Target className="w-6 h-6 text-primary-600" />
+                  <h2 className="text-xl font-semibold text-gray-900">Assessment Overview</h2>
+                </div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-3xl font-bold">{assessment.overallScore}</div>
+                  <div className="text-sm text-gray-600">Timeline: {assessment.estTimeline || '—'}</div>
+                </div>
+                <RubricBreakdown criteria={assessment.rubric.criteria} preview={true} />
               </div>
             )}
 
@@ -246,6 +273,24 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Sections */}
+        <div id="projects" className="mt-8" />
+        <div className="card mb-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <Target className="w-6 h-6 text-primary-600" />
+            <h2 className="text-xl font-semibold text-gray-900">Projects</h2>
+          </div>
+          <p className="text-gray-600 text-sm">Project board and phases will appear here.</p>
+        </div>
+        <div id="tasks" className="card mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Tasks</h2>
+          <p className="text-gray-600 text-sm">Tasks related to this idea will be listed here.</p>
+        </div>
+        <div id="reports" className="card">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Reports</h2>
+          <p className="text-gray-600 text-sm">AI assessment details and rollups.</p>
         </div>
       </main>
     </div>

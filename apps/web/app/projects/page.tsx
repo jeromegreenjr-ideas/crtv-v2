@@ -120,7 +120,7 @@ export default async function ProjectsPage() {
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Target className="w-6 h-6 text-green-600" />
                   </div>
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-status-success/15 text-status-success">
                     <CheckCircle className="w-3 h-3 mr-1" />
                     Active
                   </span>

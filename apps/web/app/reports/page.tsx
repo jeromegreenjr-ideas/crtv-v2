@@ -1,4 +1,5 @@
 import { getAllIdeas, getIdeaWithAssessment } from '../../lib/data';
+import { RubricBreakdown } from '../../components/RubricBreakdown';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,14 +26,8 @@ export default async function ReportsPage() {
                 </div>
               </div>
               {p.assessment?.rubric?.criteria && (
-                <div className="mt-3 grid md:grid-cols-3 gap-2">
-                  {p.assessment.rubric.criteria.slice(0, 6).map((c: any) => (
-                    <div key={c.key} className="border rounded-lg p-3">
-                      <div className="font-medium">{c.label}</div>
-                      <div className="text-sm text-gray-600">Score {c.score} · {c.weight * 100}%</div>
-                      <div className="text-sm text-gray-600 mt-1">{c.reason}</div>
-                    </div>
-                  ))}
+                <div className="mt-3">
+                  <RubricBreakdown criteria={p.assessment.rubric.criteria} preview={true} />
                 </div>
               )}
             </div>

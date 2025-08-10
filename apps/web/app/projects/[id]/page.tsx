@@ -34,15 +34,25 @@ export default async function ProjectDetail({ params }: { params: { id: string }
                 <div className="text-sm text-gray-600">{pct}%</div>
               </div>
               <ul className="space-y-2">
-                {tasks.map((t: any) => (
-                  <li key={t.id} className="flex items-center justify-between border rounded-lg p-3">
-                    <div>
-                      <div className="font-medium">{t.title}</div>
-                      <div className="text-sm text-gray-600">{t.status}</div>
-                    </div>
-                    <div className="text-sm text-gray-600">P{t.priority ?? 2}</div>
-                  </li>
-                ))}
+                {tasks.map((t: any) => {
+                  const statusMap: Record<string, string> = {
+                    todo: 'bg-status-todo/15 text-status-todo',
+                    in_progress: 'bg-status-progress/15 text-status-progress',
+                    review: 'bg-status-review/15 text-status-review',
+                    done: 'bg-status-success/15 text-status-success',
+                    blocked: 'bg-status-danger/15 text-status-danger',
+                  };
+                  const badge = statusMap[t.status] || 'bg-gray-100 text-gray-700';
+                  return (
+                    <li key={t.id} className="flex items-center justify-between border rounded-lg p-3">
+                      <div>
+                        <div className="font-medium">{t.title}</div>
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${badge}`}>{t.status}</span>
+                      </div>
+                      <div className="text-sm text-gray-600">P{t.priority ?? 2}</div>
+                    </li>
+                  );
+                })}
                 {tasks.length === 0 && <div className="text-sm text-gray-600">No tasks yet.</div>}
               </ul>
             </div>

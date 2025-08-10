@@ -2,16 +2,21 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEventSource } from '../../../../hooks/useEventSource';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { RubricBreakdown } from '../../../../components/RubricBreakdown';
 
 export default function ProducerPreview() {
   const params = useSearchParams();
   const userId = params.get('userId');
   const [progress, setProgress] = useState<{ step?: string; pct?: number }>({ pct: 0 });
+  const [criteria, setCriteria] = useState<any[] | undefined>(undefined);
   useEventSource(userId ? `/api/events/assessment-producer-${userId}` : '', (data) => {
     if (!data?.step) return;
     setProgress({ step: data.step, pct: data.pct });
   });
+  useEffect(() => {
+    // TODO: add API for producer preview if needed; keep placeholder rubric for now
+  }, [userId]);
   return (
     <div className="min-h-screen max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-4">Preview your assessment</h1>
@@ -22,6 +27,10 @@ export default function ProducerPreview() {
       <div className="card mb-4">
         <h2 className="font-medium mb-2">Profile preview</h2>
         <p className="text-gray-600">Your modular profile is ready. Create your account to edit and publish.</p>
+      </div>
+      <div className="card mb-4">
+        <h2 className="font-medium mb-2">Rubric sneak peek</h2>
+        <RubricBreakdown criteria={criteria} preview={true} />
       </div>
       <div className="card mb-6">
         <h2 className="font-medium mb-2">Unlock full insight</h2>
