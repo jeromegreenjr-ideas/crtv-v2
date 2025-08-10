@@ -10,6 +10,7 @@
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {
+    "@crtv/ai": "workspace:*",
     "@crtv/db": "workspace:*",
     "@headlessui/react": "^2.2.7",
     "@neondatabase/serverless": "^0.9.0",

@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { broadcast } from '../../../lib/eventBus';
 
+import { orchestrateIdea } from '@crtv/ai';
+
 // Simple mock orchestrator for deployment
 async function mockOrchestrateIdea(summary: string) {
   return {
@@ -74,8 +76,8 @@ export async function generateBriefAndPlan(formData: FormData) {
     };
     await addIdea(idea);
 
-    // Generate brief and plan via orchestrator
-    const orchestrationResult = await mockOrchestrateIdea(summary);
+    // Generate brief and plan via orchestrator (fallback mock if external tools not available)
+    const orchestrationResult = await orchestrateIdea({ summary, idempotencyKey });
 
     // Store brief
     const brief = {
@@ -137,45 +139,23 @@ export async function generateBriefAndPlan(formData: FormData) {
   }
 }
 
+import { createProjectsWithPlan } from '../../../lib/data';
+
 export async function approveBrief(ideaId: number) {
   try {
     // Update idea status to active
     await updateIdeaStatus(ideaId, 'active');
 
+    // Generate canonical plan/checkpoints/tasks again deterministically
+    const { brief, plan, checkpoints: cps, tasks: tsks } = await orchestrateIdea({ summary: 'recalc', idempotencyKey: `approve-${ideaId}` });
+    await createProjectsWithPlan(ideaId, plan, cps, tsks);
+
     // Create events
     const newEvents = [
-      {
-        id: getNextEventId(),
-        entityType: 'idea',
-        entityId: ideaId,
-        kind: 'brief.approved',
-        data: { ideaId },
-        createdAt: new Date(),
-      },
-      {
-        id: getNextEventId() + 1,
-        entityType: 'idea',
-        entityId: ideaId,
-        kind: 'projects.created',
-        data: { count: 5 },
-        createdAt: new Date(),
-      },
-      {
-        id: getNextEventId() + 2,
-        entityType: 'idea',
-        entityId: ideaId,
-        kind: 'checkpoints.created',
-        data: { count: 5 },
-        createdAt: new Date(),
-      },
-      {
-        id: getNextEventId() + 3,
-        entityType: 'idea',
-        entityId: ideaId,
-        kind: 'tasks.created',
-        data: { count: 3 },
-        createdAt: new Date(),
-      }
+      { id: getNextEventId(), entityType: 'idea', entityId: ideaId, kind: 'brief.approved', data: { ideaId }, createdAt: new Date() },
+      { id: getNextEventId() + 1, entityType: 'idea', entityId: ideaId, kind: 'projects.created', data: { count: 5 }, createdAt: new Date() },
+      { id: getNextEventId() + 2, entityType: 'idea', entityId: ideaId, kind: 'checkpoints.created', data: { count: 5 }, createdAt: new Date() },
+      { id: getNextEventId() + 3, entityType: 'idea', entityId: ideaId, kind: 'tasks.created', data: { count: 3 }, createdAt: new Date() },
     ];
     await addEvents(newEvents);
 
