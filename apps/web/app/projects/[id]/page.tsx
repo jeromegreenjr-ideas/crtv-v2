@@ -1,4 +1,5 @@
 import { getProject, getCheckpointsByProject, getTasksByCheckpoint, calcCheckpointPct, calcProjectPct } from '../../../lib/data';
+import RequireRole from '../../../components/RequireRole';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,7 @@ export default async function ProjectDetail({ params }: { params: { id: string }
   const checkpoints = await getCheckpointsByProject(projectId);
   const projectPct = await calcProjectPct(projectId);
   return (
+    <RequireRole allow={["stakeholder","director","pm","producer","hr"]}>
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <header className="flex items-center justify-between">
         <div>
@@ -48,6 +50,7 @@ export default async function ProjectDetail({ params }: { params: { id: string }
         }))}
       </div>
     </div>
+    </RequireRole>
   );
 }
 

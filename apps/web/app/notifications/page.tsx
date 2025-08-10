@@ -1,6 +1,7 @@
 "use client";
 import { useEventSource } from '../../hooks/useEventSource';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function NotificationsPage() {
   const [events, setEvents] = useState<any[]>([]);
@@ -22,6 +23,7 @@ export default function NotificationsPage() {
             <div key={e.id} className="card">
               <div className="font-medium">{e.kind}</div>
               {e.data && <div className="text-sm text-gray-600">{JSON.stringify(e.data)}</div>}
+              {e.data?.projectId && <Link className="text-blue-600 underline text-sm" href={`/projects/${e.data.projectId}`}>Open project</Link>}
             </div>
           ))}
         </div>

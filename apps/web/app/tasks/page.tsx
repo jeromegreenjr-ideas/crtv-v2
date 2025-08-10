@@ -1,6 +1,7 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { getTasksByAssignee, getUserByEmail } from '../../lib/data';
+import RequireRole from '../../components/RequireRole';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,7 @@ export default async function MyTasks() {
   const dbUser = email ? await getUserByEmail(email) : null;
   const list = dbUser ? await getTasksByAssignee(dbUser.id) : [];
   return (
+    <RequireRole allow={["producer","pm","director","stakeholder","hr"]}>
     <div className="max-w-5xl mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-6">My Tasks</h1>
       {list.length === 0 ? (
@@ -31,6 +33,7 @@ export default async function MyTasks() {
         </div>
       )}
     </div>
+    </RequireRole>
   );
 }
 
