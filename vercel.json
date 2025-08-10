@@ -1,6 +1,6 @@
 {
   "buildCommand": "pnpm --filter web build",
-  "outputDirectory": "apps/web/.next",
+  "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "pnpm install --no-frozen-lockfile",
   "devCommand": "pnpm --filter web dev"
