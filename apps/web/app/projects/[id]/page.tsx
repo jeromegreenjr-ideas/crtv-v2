@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft, Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
 const BulkOps = dynamic(() => import('./bulk-ops'), { ssr: false });
+const KanbanClient = dynamic(() => import('./kanban-client'), { ssr: false });
 import { revalidatePath } from 'next/cache';
 import { updateCheckpoint, createTask, setTasksAssignee, shiftCheckpointDue, moveCheckpoint } from '../../../lib/data';
 import RequireRole from '../../../components/RequireRole';
@@ -105,6 +106,10 @@ export default async function ProjectDetail({ params }: { params: { id: string }
           );
         }))}
         <BulkOps projectId={projectId} />
+        <div className="card">
+          <div className="font-semibold mb-2">Kanban</div>
+          <KanbanClient projectId={projectId} />
+        </div>
       </div>
     </div>
     </RequireRole>
