@@ -24,7 +24,7 @@ export async function GET() {
     email: user.email,
     id: dbUser.id,
     role: dbUser.role,
-    profile: producerProfile ? { slug: producerProfile.publicSlug, tier: producerProfile.crtvTier } : null,
+    profile: producerProfile ? { slug: producerProfile.publicSlug, tier: producerProfile.crtvTier, displayName: producerProfile.displayName || producerProfile.username, isPublic: producerProfile.isPublic } : null,
   });
 }
 
