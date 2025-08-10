@@ -52,6 +52,15 @@ export const tasks = pgTable("tasks", {
   files: jsonb("files"),
 });
 
+export const producerLevels = pgTable("producer_levels", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  tier: varchar("tier", { length: 32 }).notNull(),
+  scores: jsonb("scores").notNull(),
+  qualityEffort: integer("quality_effort").notNull().default(0),
+  assessedAt: timestamp("assessed_at").defaultNow(),
+});
+
 export const feedback = pgTable("feedback", {
   id: serial("id").primaryKey(),
   checkpointId: integer("checkpoint_id").notNull(),

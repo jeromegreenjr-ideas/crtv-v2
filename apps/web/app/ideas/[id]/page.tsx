@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getIdeaData } from '../../../lib/data';
-import ActivityList from './ActivityList';
+import ActivityStream from './ActivityStream';
 import { ArrowLeft, CheckCircle, Clock, Users, Target, FileText } from 'lucide-react';
 import Link from 'next/link';
 
@@ -150,7 +150,7 @@ export default async function IdeaDetailPage({ params }: IdeaDetailPageProps) {
                 <Clock className="w-6 h-6 text-primary-600" />
                 <h2 className="text-xl font-semibold text-gray-900">Activity Timeline</h2>
               </div>
-              <ActivityList events={events} />
+              <ActivityStream ideaId={ideaId} initialEvents={events} />
             </div>
           </div>
 
