@@ -7,10 +7,7 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const cookieStore = cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore }, {
-    supabaseUrl: process.env.SUPABASE_URL!,
-    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  });
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
   if (body.action === 'signUp') {
     const { email, password } = body;

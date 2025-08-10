@@ -7,10 +7,7 @@ export const runtime = 'nodejs';
 
 export async function GET() {
   const cookieStore = cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore }, {
-    supabaseUrl: process.env.SUPABASE_URL!,
-    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  });
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
   const { data } = await supabase.auth.getUser();
   const user = data.user;
   if (!user?.email) return NextResponse.json({ authenticated: false });

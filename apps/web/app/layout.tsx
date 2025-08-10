@@ -1,6 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { createServerClient } from '@supabase/auth-helpers-nextjs';
+import { createPagesServerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
@@ -12,12 +12,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Initialize Supabase on the server for session-aware rendering
   const cookieStore = cookies();
-  const supabase = createServerClient({
-    cookies: () => cookieStore,
-  }, {
-    supabaseUrl: process.env.SUPABASE_URL!,
-    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  });
+  const supabase = createPagesServerClient({ cookies: () => cookieStore });
 
   // Optional: prefetch user to drive role-aware UI later
   await supabase.auth.getUser();
