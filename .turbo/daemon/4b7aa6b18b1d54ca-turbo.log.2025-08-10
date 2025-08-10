@@ -193,3 +193,12 @@
 2025-08-10T01:53:48.013586Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
 2025-08-10T01:54:04.713722Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/app/page.tsx")}
 2025-08-10T01:54:04.713751Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-10T02:19:39.693094Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/package.json")}
+2025-08-10T02:19:39.693112Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-10T02:20:05.491775Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/package.json")}
+2025-08-10T02:20:05.491794Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-10T02:20:05.491844Z  WARN turborepo_lib::package_changes_watcher: hashes are the same, no need to rerun
+2025-08-10T02:23:45.990502Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/ai/src/orchestrator.ts")}
+2025-08-10T02:23:45.990533Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@crtv/ai"), path: AnchoredSystemPathBuf("packages/ai") }}))
+2025-08-10T02:23:55.891188Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/ai/src/producerAssessment.ts")}
+2025-08-10T02:23:55.891206Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@crtv/ai"), path: AnchoredSystemPathBuf("packages/ai") }}))

@@ -1,5 +1,4 @@
 import { BriefSchema, PhasePlanSchema, CheckpointListSchema, TaskListSchema, IdeaAssessmentSchema, type Brief, type PhasePlan, type CheckpointList, type TaskList, type IdeaAssessment } from "./schemas";
-import type { ResponseFormatJSONSchema } from "openai/resources/responses.mjs";
 let openai: any = null;
 try {
   if (process.env.OPENAI_API_KEY) {
@@ -45,7 +44,7 @@ export async function orchestrateIdea(intake: OrchestratorInput, tools?: Orchest
   if (!tools && openai) {
     const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
-    const jsonBriefSchema: ResponseFormatJSONSchema = {
+    const jsonBriefSchema: any = {
       type: "json_schema",
       json_schema: {
         name: "Brief",
@@ -63,7 +62,7 @@ export async function orchestrateIdea(intake: OrchestratorInput, tools?: Orchest
       }
     };
 
-    const jsonPhasePlanSchema: ResponseFormatJSONSchema = {
+    const jsonPhasePlanSchema: any = {
       type: "json_schema",
       json_schema: {
         name: "PhasePlan",
@@ -91,7 +90,7 @@ export async function orchestrateIdea(intake: OrchestratorInput, tools?: Orchest
       }
     };
 
-    const jsonCheckpointSchema: ResponseFormatJSONSchema = {
+    const jsonCheckpointSchema: any = {
       type: "json_schema",
       json_schema: {
         name: "CheckpointList",
@@ -117,7 +116,7 @@ export async function orchestrateIdea(intake: OrchestratorInput, tools?: Orchest
       }
     };
 
-    const jsonTaskSchema: ResponseFormatJSONSchema = {
+    const jsonTaskSchema: any = {
       type: "json_schema",
       json_schema: {
         name: "TaskList",

@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { ProducerAssessmentSchema, ProducerAssessmentCategory, type ProducerAssessment } from './schemas';
-import type { ResponseFormatJSONSchema } from 'openai/resources/responses.mjs';
 let openai: any = null;
 try {
   if (process.env.OPENAI_API_KEY) {
@@ -24,7 +23,7 @@ function pseudoScore(seed: number) {
 export async function assessProducer(input: z.infer<typeof ProducerAssessmentInput>): Promise<ProducerAssessment> {
   if (openai) {
     const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-    const schema: ResponseFormatJSONSchema = {
+    const schema: any = {
       type: 'json_schema',
       json_schema: {
         name: 'ProducerAssessment',
